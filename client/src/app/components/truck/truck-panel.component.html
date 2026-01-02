@@ -1,0 +1,28 @@
+<div class="card bg-base-100 shadow-xl p-2">
+  <h2 class="card-title">Truck Status</h2>
+  <div class="flex gap-4 mt-2">
+    <!-- Daños -->
+    <div class="flex flex-col gap-1 w-1/2">
+      <span>Engine Damage</span>
+      <progress class="progress progress-error" [value]="telemetry().damage?.engine" max="100"></progress>
+
+      <span>Transmission Damage</span>
+      <progress class="progress progress-error" [value]="telemetry().damage?.transmission" max="100"></progress>
+
+      <span>Chassis Damage</span>
+      <progress class="progress progress-error" [value]="telemetry().damage?.chassis" max="100"></progress>
+    </div>
+
+    <!-- Luces -->
+    <div class="flex flex-col gap-1 w-1/2">
+      <span>Lights</span>
+      <div class="flex gap-2">
+        <span class="badge" [ngClass]="{'badge-success': telemetry().light_state?.low_beam, 'badge-ghost': !telemetry().light_state?.low_beam}">Low Beam</span>
+        <span class="badge" [ngClass]="{'badge-success': telemetry().light_state?.high_beam, 'badge-ghost': !telemetry().light_state?.high_beam}">High Beam</span>
+        <span class="badge" [ngClass]="{'badge-success': telemetry().light_state?.blink_left, 'badge-ghost': !telemetry().light_state?.blink_left}">Left</span>
+        <span class="badge" [ngClass]="{'badge-success': telemetry().light_state?.blink_right, 'badge-ghost': !telemetry().light_state?.blink_right}">Right</span>
+        <span class="badge" [ngClass]="{'badge-error': telemetry().light_state?.brake, 'badge-ghost': !telemetry().light_state?.brake}">Brake</span>
+      </div>
+    </div>
+  </div>
+</div>
