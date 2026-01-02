@@ -21,6 +21,16 @@ fn read_telemetry() -> String {
     serde_json::to_string(&data).unwrap()
 }
 
+#[command]
+fn get_config() -> AppConfig {
+    AppConfig::load()
+}
+
+#[command]
+fn save_config(config: AppConfig) -> Result<(), String> {
+    config.save()
+}
+
 fn main() {
     tauri::Builder::default()
         .setup(|app| {
@@ -40,7 +50,7 @@ fn main() {
             });
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![read_telemetry])
+        .invoke_handler(tauri::generate_handler![read_telemetry, get_config, save_config])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

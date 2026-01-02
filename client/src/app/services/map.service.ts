@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import roads from '../../assets/map-data/roads.geojson';
-import cities from '../../assets/map-data/cities.geojson';
+// import roads from '../../assets/map-data/roads.geojson';
+// import cities from '../../assets/map-data/cities.geojson';
 
 @Injectable({ providedIn: 'root' })
 export class MapDataService {
-  roads = roads;
-  cities = cities;
+  roads: any = {};
+  cities: any = {};
 }

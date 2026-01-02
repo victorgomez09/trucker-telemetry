@@ -6,7 +6,7 @@
     "start": "ng serve",
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
-    "tauri:serve": "ng build --watch && tauri dev",
+    "tauri:serve": "ng build --watch --configuration development && tauri dev",
     "tauri:build": "ng build --prod && tauri build",
     "test": "ng test",
     "postinstall": "bash scripts/setup‑maps.sh"
