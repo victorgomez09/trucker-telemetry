@@ -1,10 +1,12 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
-#[repr(C)]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
-pub struct Vec3 { pub x: f32, pub y: f32, pub z: f32 }
+pub struct Vec3 {
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+}
 
-#[repr(C)]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct WheelData {
     pub suspension: f32,
@@ -16,7 +18,6 @@ pub struct WheelData {
     pub position: Vec3,
 }
 
-#[repr(C)]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct DamageData {
     pub engine: f32,
@@ -26,7 +27,6 @@ pub struct DamageData {
     pub wheels: f32,
 }
 
-#[repr(C)]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct LightState {
     pub low_beam: bool,
@@ -39,7 +39,6 @@ pub struct LightState {
     pub parking: bool,
 }
 
-#[repr(C)]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct NavWaypoint {
     pub x: f32,
@@ -49,7 +48,6 @@ pub struct NavWaypoint {
     pub is_reached: bool,
 }
 
-#[repr(C)]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct NavigationData {
     pub current_waypoint_index: u32,
@@ -57,7 +55,6 @@ pub struct NavigationData {
     pub waypoints: Vec<NavWaypoint>,
 }
 
-#[repr(C)]
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct TelemetryData {
     pub timestamp: f32,

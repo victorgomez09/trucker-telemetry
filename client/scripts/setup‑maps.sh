@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+# set -e
 
 echo "🌍 Clonando repositorio de mapas..."
 if [ ! -d "maps" ]; then
@@ -20,7 +20,7 @@ cd maps
 if [ -f "package.json" ]; then
   # Usa npm para instalar dependencias y generar
   npm install
-  npm run build
+  npm run build -w packages/clis/parser
 else
   echo "❗ No se encontró package.json en maps — revisa la estructura"
 fi

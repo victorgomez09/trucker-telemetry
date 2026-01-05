@@ -15,6 +15,7 @@ export class TopbarComponent implements OnInit {
 
   ngOnInit(): void {
     this.telemetryService.telemetry$.subscribe((data) => {
+      console.log('TopbarComponent received telemetry data:', data);
       this.telemetry = data;
     });
   }
