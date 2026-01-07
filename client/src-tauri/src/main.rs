@@ -38,7 +38,7 @@ pub struct Ets2Data {
 #[tauri::command]
 fn read_telemetry() -> Result<Ets2Data, String> {
     // 1. Intentamos el nombre estándar
-    let shm_id = "SCS_RUST_TELEMETRY";
+    let shm_id = "ETS2_RUST_SHMEM";
 
     let shm = ShmemConf::new()
         .os_id(shm_id)
@@ -56,20 +56,23 @@ fn read_telemetry() -> Result<Ets2Data, String> {
         .map_err(|_| "Telemetría no encontrada. ¿Está el camión en marcha?".to_string())?;
 
     unsafe {
+        println!("Shared memory accessed: {}", shm_id);
+        println!("Shared memory size: {}", shm.len());
+        println!("Shared memory ptr: {:?}", shm.as_ptr());
         let data_ptr = shm.as_ptr() as *const Ets2Data;
         Ok(*data_ptr)
     }
 }
 
-// #[command]
-// fn get_config() -> AppConfig {
-//     AppConfig::load()
-// }
+#[tauri::command]
+fn get_config() -> AppConfig {
+    AppConfig::load()
+}
 
-// #[command]
-// fn save_config(config: AppConfig) -> Result<(), String> {
-//     config.save()
-// }
+#[tauri::command]
+fn save_config(config: AppConfig) -> Result<(), String> {
+    config.save()
+}
 
 fn main() {
     // tauri::Builder::default()
@@ -104,7 +107,11 @@ fn main() {
     //     .expect("error while running tauri application");
     tauri::Builder::default()
         // REGISTRO DEL COMANDO
-        .invoke_handler(tauri::generate_handler![read_telemetry])
+        .invoke_handler(tauri::generate_handler![
+            read_telemetry,
+            get_config,
+            save_config
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

@@ -167,6 +167,7 @@ dependencies = [
  "once_cell",
  "shared_memory",
  "simple_file_logger",
+ "smart-default",
 ]
 
 [[package]]
@@ -540,6 +541,17 @@ checksum = "9cce512550806f7e3cd3055e9f61118ff72c9d08f212466449c55c529008d698"
 dependencies = [
  "dirs",
  "flexi_logger",
+]
+
+[[package]]
+name = "smart-default"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0eb01866308440fc64d6c44d9e86c5cc17adfe33c4d6eed55da9145044d0ffc1"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
