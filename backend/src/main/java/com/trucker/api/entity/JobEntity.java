@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,7 +34,18 @@ public class JobEntity {
     private Integer distanceKm;
     private Float cargoDamagePerc;
 
+    @Column(name = "truck_name")
+    private String truckName;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "job_id")
     private List<JobEventEntity> events = new ArrayList<>();
+
+    @OneToMany(mappedBy = "job", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RefuelEntity> refuels = new ArrayList<>();
+
+    public void addRefuel(RefuelEntity refuel) {
+        refuels.add(refuel);
+        refuel.setJob(this);
+    }
 }

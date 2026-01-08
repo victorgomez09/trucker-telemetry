@@ -46,6 +46,7 @@ pub struct Ets2Data {
     pub company_source: [u8; 64],
     pub company_destination: [u8; 64],
     pub cargo_name: [u8; 64],
+    pub truck_name: [u8; 64],
 
     pub event_count: i32,
     pub next_event_index: i32,
@@ -115,9 +116,14 @@ fn read_telemetry() -> Result<Ets2Data, String> {
             format!("En ruta a {}", parse(&d.city_destination))
         };
 
+        let truck_name_str = String::from_utf8_lossy(&data.truck_name)
+            .trim_matches(char::from(0))
+            .to_string();
+
         data_ptr.events = events_vec.try_into().unwrap_or([Default::default(); 128]);
         data_ptr.has_active_job = has_job;
         data_ptr.status_message = status_msg;
+        data_ptr.truck_name = truck_name_str;
         Ok(*data_ptr)
     }
 }

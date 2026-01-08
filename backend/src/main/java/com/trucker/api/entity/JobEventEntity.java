@@ -2,6 +2,8 @@ package com.trucker.api.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,8 +26,8 @@ public class JobEventEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "event_type")
-    private Integer eventType;
+    @Enumerated(EnumType.STRING)
+    private EventTypeEnum type;
 
     private String description;
 

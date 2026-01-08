@@ -45,4 +45,25 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="4" author="viti">
+        <addColumn tableName="jobs">
+            <column name="truck_name" type="VARCHAR(64)" />
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="5" author="viti">
+        <createTable tableName="refuels">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="job_id" type="BIGINT">
+                <constraints foreignKeyName="fk_refuel_job" referencedTableName="jobs"
+                    referencedColumnNames="id" />
+            </column>
+            <column name="liters" type="FLOAT" />
+            <column name="total_cost" type="FLOAT" />
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" />
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
