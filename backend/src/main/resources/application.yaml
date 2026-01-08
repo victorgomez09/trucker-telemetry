@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: trucker-api
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/trucker_telemetry
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+
+  liquibase:
+    enabled: true
+    change-log: classpath:db/changelog/db.changelog-master.xml
+
+logging:
+  pattern:
+    console: "%d %-5level %logger : %msg%n"
+  level:
+    org.springframework: info
+    org.hibernate: debug
