@@ -48,6 +48,10 @@ struct Ets2Data {
     GameplayEvents events[MAX_EVENTS];
 
     int32_t job_finished;
+
+    float x, y, z;          // actual position
+    float speed_limit;      // Speed limiter of the road
+    int32_t is_cheater;
 };
 #pragma pack(pop)
 
@@ -187,6 +191,23 @@ SCSAPI_VOID telemetry_store(const scs_string_t name, const scs_u32_t index, cons
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_engine_gear) == 0) shared_data->gear = value->value_s32.value;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_fuel_average_consumption) == 0) shared_data->fuel_consumption = value->value_float.value * 100.0f;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_wear_chassis) == 0) shared_data->cargo_damage = value->value_float.value;
+
+    // Anti-Cheat
+    if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_world_placement) == 0) {
+        shared_data->x = value->value_dplacement.position.x;
+        shared_data->z = value->value_dplacement.position.z;
+        
+        float dist = sqrt(pow(shared_data->x - last_x, 2) + pow(shared_data->z - last_y, 2));
+        if (dist > 500.0f && shared_data->speed < 5.0f) { 
+            shared_data->is_cheater = 1;
+        }
+        last_x = shared_data->x; last_y = shared_data->z;
+    }
+    
+    // Speed limiter
+    if (strcmp(name, SCS_TELEMETRY_NAVIGATION_CHANNEL_speed_limit) == 0) {
+        shared_data->speed_limit = value->value_float.value * 3.6f;
+    }
 }
 
 SCSAPI_VOID configuration_handler(const scs_event_t event, const void* const event_info, const scs_context_t context) {

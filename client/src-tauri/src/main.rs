@@ -135,6 +135,28 @@ fn reset_job_status() -> Result<(), String> {
 }
 
 #[tauri::command]
+async fn submit_job(data: Ets2Data) -> Result<String, String> {
+    let client = reqwest::Client::new();
+    let response = client.post("http://localhost:8080/api/v1/jobs/report")
+        .json(&data)
+        .send()
+        .await;
+
+    match response {
+        Ok(res) if res.status().is_success() => {
+            // ÉXITO: Borramos el archivo de caché (Modo Online)
+            delete_cache_file(); 
+            Ok("Trabajo enviado correctamente".into())
+        },
+        _ => {
+            // ERROR (Offline): NO borramos el archivo.
+            // Al reiniciar la app, el Plugin leerá el .bin y Angular lo volverá a mostrar
+            Err("Sin conexión. El trabajo se ha guardado localmente.".into())
+        }
+    }
+}
+
+#[tauri::command]
 fn get_config() -> AppConfig {
     AppConfig::load()
 }

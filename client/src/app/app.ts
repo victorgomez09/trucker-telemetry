@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { invoke } from '@tauri-apps/api/core';
-import { EventsHistory } from "./components/events-history/events-history";
+import { EventsHistory } from './components/events-history/events-history';
 import { TelemetryService } from './services/telemetry.service';
 
 @Component({
@@ -25,21 +25,28 @@ export class App {
   progressPercentage = computed(() => {
     const data = this.telemetry();
     if (!data || data.planned_distance <= 0) return 0;
-    
+
     // Aquí podrías implementar la lógica: (Distancia Inicial - Distancia Restante) / Distancia Inicial
     // Por ahora usaremos un valor de ejemplo o basado en los datos que tengas
     return 45; // Ejemplo: 45% completado
   });
 
+  // Signal computado para exceso de velocidad
+  public isSpeeding = computed(() => {
+    const data = this.telemetry();
+    return data && data.speed > data.speed_limit + 5; // Margen de 5km/h
+  });
+
+  // Signal para trampas
+  public cheatDetected = computed(() => this.telemetry()?.is_cheater === 1);
+  public offlineMode = this.telemetryService.isOfflineMode;
+
   async enviarTrabajo() {
     try {
-      console.log("Enviando reporte...", this.telemetry());
-      
-      // await this.http.post('...', this.telemetry()).toPromise();
-
-      await invoke('reset_job_status');
+      console.log('Enviando reporte...', this.telemetry());
+      await this.telemetryService.sendToBackend(this.telemetry());
     } catch (e) {
-      console.error("Error al procesar el envío:", e);
+      console.error('Error al procesar el envío:', e);
     }
   }
 }
