@@ -20,19 +20,42 @@ use telemetry::TelemetryData;
 
 const SHMEM_NAME: &str = "ETS2_RUST_SHMEM";
 
-#[repr(C)]
-#[derive(Default, Serialize, Clone, Copy)] // Añadimos Copy para facilitar el clonado
+#[repr(C, packed)]
+#[derive(Clone, Copy)]
+pub struct GameplayEvent {
+    pub type: i32,
+    pub value: i64,
+    pub description: [u8; 128],
+    pub timestamp: u64,
+}
+
+#[repr(C, packed)]
+#[derive(Clone, Copy)]
 pub struct Ets2Data {
     pub speed: f32,
     pub rpm: f32,
     pub gear: i32,
-    pub fuel: f32,
-    pub nav_distance: f32,
-    pub nav_time: f32,
-    pub nav_speed_limit: f32,
+    pub fuel_consumption: f32,
+
+    pub cargo_damage: f32,
+    pub cargo_weight: f32,
     pub job_income: u64,
-    pub job_remaining_time: i32,
-    pub job_cargo_mass: f32,
+    pub planned_distance: i32,
+    pub city_source: [u8; 64],
+    pub city_destination: [u8; 64],
+    pub company_source: [u8; 64],
+    pub company_destination: [u8; 64],
+    pub cargo_name: [u8; 64],
+
+    pub event_count: i32,
+    pub next_event_index: i32,
+    pub events: [GameplayEvent; 128],
+}
+
+impl Default for Ets2Data {
+    fn default() -> Self {
+        unsafe { std::mem::zeroed() }
+    }
 }
 
 #[tauri::command]
@@ -56,10 +79,25 @@ fn read_telemetry() -> Result<Ets2Data, String> {
         .map_err(|_| "Telemetría no encontrada. ¿Está el camión en marcha?".to_string())?;
 
     unsafe {
-        println!("Shared memory accessed: {}", shm_id);
-        println!("Shared memory size: {}", shm.len());
-        println!("Shared memory ptr: {:?}", shm.as_ptr());
         let data_ptr = shm.as_ptr() as *const Ets2Data;
+        let parse = |b: &[u8]| String::from_utf8_lossy(b).trim_matches(char::from(0)).to_string();
+
+        // Procesar la lista de eventos
+        let mut events_vec = Vec::new();
+        for i in 0..(*data_ptr).event_count as usize {
+            let ev = (*data_ptr).events[i];
+            events_vec.push(FrontendEvent {
+                event_type: ev.event_type,
+                value: ev.value,
+                text: parse(&ev.text),
+                timestamp: ev.timestamp,
+            });
+        }
+        
+        // Opcional: Ordenar por timestamp para que el más nuevo esté arriba
+        events_vec.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+
+        data_ptr.events = events_vec.try_into().unwrap_or([Default::default(); 128]);
         Ok(*data_ptr)
     }
 }
