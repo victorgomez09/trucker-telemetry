@@ -1,0 +1,47 @@
+<div class="card bg-base-100 shadow-xl overflow-hidden">
+  <div
+    class="bg-primary p-4 text-primary-content font-black italic flex justify-between items-center"
+  >
+    <span>HISTORIAL DE VIAJE</span>
+    <span class="badge badge-ghost">{{ telemetry().events?.length || 0 }}</span>
+  </div>
+
+  <div class="max-h-[400px] overflow-y-auto">
+    <table class="table table-zebra table-pin-rows">
+      <thead>
+        <tr>
+          <th>Evento</th>
+          <th>Descripción</th>
+          <th class="text-right">Importe</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (ev of telemetry().events; track ev.timestamp) {
+        <tr class="hover">
+          <td>
+            @switch (ev.type) { @case (1) {
+            <div class="badge badge-error badge-xs"></div>
+            } @case (2) {
+            <div class="badge badge-success badge-xs"></div>
+            } @case (3) {
+            <div class="badge badge-info badge-xs"></div>
+            } @default {
+            <div class="badge badge-ghost badge-xs"></div>
+            } }
+          </td>
+          <td class="text-sm">{{ ev.description }}</td>
+          <td class="text-right font-mono text-xs">
+            {{ ev.value > 0 ? (ev.value | currency : 'EUR' : 'symbol' : '1.0-0') : '---' }}
+          </td>
+        </tr>
+        } @empty {
+        <tr>
+          <td colspan="3" class="text-center opacity-30 py-10">
+            Esperando eventos en carretera...
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
