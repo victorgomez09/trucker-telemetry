@@ -44,6 +44,8 @@ struct Ets2Data {
     int32_t event_count;
     int32_t next_event_index;
     GameplayEvents events[MAX_EVENTS];
+
+    int32_t job_finished;
 };
 #pragma pack(pop)
 
@@ -103,9 +105,41 @@ SCSAPI_VOID gameplay_handler(const scs_event_t event, const void* const event_in
         }
         add_gameplay_event(3, amount, "Peaje");
     }
-    else if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_job_delivered) == 0) {
-        add_gameplay_event(2, 0, "Trabajo Entregado");
-        // Opcional: _unlink(BACKUP_FILE); // Descomentar si quieres borrar todo al entregar
+    else if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_player_use_ferry) == 0) {
+        int64_t amount = 0;
+        for (const scs_named_value_t* attr = ev->attributes; attr->name; ++attr) {
+            if (strcmp(attr->name, "pay.amount") == 0) amount = attr->value.value_s64.value;
+        }
+        add_gameplay_event(4, amount, "Ferry");
+    }
+    else if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_player_use_train) == 0) {
+        int64_t amount = 0;
+        for (const scs_named_value_t* attr = ev->attributes; attr->name; ++attr) {
+            if (strcmp(attr->name, "pay.amount") == 0) amount = attr->value.value_s64.value;
+        }
+        add_gameplay_event(5, amount, "Tren");
+    }
+if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_job_delivered) == 0) {
+        shared_data->job_finished = 1; // Activamos el flag para el Front
+        
+        // Extraemos los datos finales de la entrega (ingresos reales, XP, etc.)
+        for (const scs_named_value_t* attr = ev->attributes; attr->name; ++attr) {
+            if (strcmp(attr->name, "revenue") == 0) shared_data->job_income = attr->value.value_s64.value;
+        }
+        
+        add_gameplay_event(2, shared_data->job_income, "Trabajo Entregado");
+        save_to_disk();
+    }
+    else if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_job_cancelled) == 0) {
+        int64_t penalty = 0;
+        for (const scs_named_value_t* attr = ev->attributes; attr->name; ++attr) {
+            if (strcmp(attr->name, "cancel.penalty") == 0) penalty = attr->value.value_s64.value;
+        }
+        add_gameplay_event(3, penalty, "Trabajo Cancelado");
+        
+        // Limpiamos los datos de ciudad inmediatamente al cancelar
+        memset(shared_data->city_source, 0, 320); 
+        _unlink(BACKUP_FILE); 
     }
 }
 
@@ -152,6 +186,7 @@ SCSAPI_VOID configuration_handler(const scs_event_t event, const void* const eve
             strcmp(old_dest, shared_data->city_destination) != 0 || 
             strcmp(old_cargo, shared_data->cargo_name) != 0) {
             
+            add_gameplay_event(4, 0, "Trabajo en curso");
             save_to_disk(); // Solo guarda si el trabajo es nuevo o diferente
             if (game_log) game_log(SCS_LOG_TYPE_message, "[Bridge] Nuevo trabajo detectado y guardado.");
         }
