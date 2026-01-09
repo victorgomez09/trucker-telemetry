@@ -16,9 +16,8 @@ export class RadioService {
   private analyser?: AnalyserNode;
   private source?: MediaElementAudioSourceNode;
 
-  // Estado reactivo
   public isPlaying = signal(false);
-  public currentStation = signal<RadioStation | null>(null);
+  public currentStation = signal<any>(null);
   public frequencyData = signal<number[]>(new Array(16).fill(0));
   public volume = signal(0.5);
 
@@ -51,66 +50,89 @@ export class RadioService {
     'https://live.radiovoz.es/mp3/stream_cadena.mp3|Radio Voz|Generalista, Noticias|ESP|64|1',
   ];
 
-  public stations = signal<RadioStation[]>(this.parseStations());
+  public stations = signal<any[]>(this.parseStations());
+
+  private MI_PROXY = 'https://stunning-garbanzo-x9qj59gwg54c9654-3000.app.github.dev';
 
   constructor() {
     this.audio.crossOrigin = 'anonymous';
-    this.audio.preload = 'auto';
+    this.audio.onplaying = () => {
+      console.log('✅ SONANDO: Conexión establecida');
+      this.isPlaying.set(true);
+    };
+    this.audio.addEventListener('stalled', () => {
+      console.warn('🚒 ¡Rescate de audio! Intentando reconexión suave...');
+      this.recuperarAudio();
+    });
 
-    // Logs de diagnóstico para saber qué pasa en Codespaces
-    this.audio.onplaying = () => console.log('▶ ▶ REPRODUCIENDO: El audio está saliendo.');
-    this.audio.onwaiting = () => console.log('⏳ Cargando buffer...');
-    this.audio.onerror = () => console.error('❌ Error de Audio:', this.audio.error);
+    // También es útil monitorizar si hay un "error" de red en el cliente
+    this.audio.onerror = () => {
+      const error = this.audio.error;
+      if (error?.code === 4 || error?.code === 2) {
+        // Errores de red o formato
+        console.log('🔄 Reintentando sintonización...');
+        setTimeout(() => this.playStation(this.currentStation()!), 2000);
+      }
+    };
   }
 
-  private parseStations(): RadioStation[] {
-    return this.rawData.map((line, index) => {
+  private parseStations() {
+    return this.rawData.map((line, i) => {
       const [url, name, genre, lang, bitrate] = line.split('|');
-      return { id: index, url, name, genre, lang, bitrate };
+      return { id: i, url, name, genre, lang, bitrate };
     });
   }
 
-  async playStation(station: RadioStation) {
+  async playStation(station: any) {
     try {
-      // 1. Resetear el stream anterior
+      this.audio.preload = 'none';
       this.audio.pause();
-      this.audio.src = station.url;
+      this.isPlaying.set(false);
+      let url = station.url;
+
+      // Detectar si estamos en un entorno web (Codespaces)
+      const isWeb = window.location.hostname.includes('github.dev');
+
+      if (isWeb && url.startsWith('https://')) {
+        console.log('setting proxy for https');
+        // Solo usamos proxy en el navegador, no en la App de escritorio
+        const separator = station.url.includes('?') ? '&' : '?';
+        url = `${this.MI_PROXY}/${station.url}${separator}nocache=${Date.now()}`;
+      }
+
+      // Limpiamos la URL por si acaso
+      let targetUrl = url.trim();
+      console.log(`🌐 URL objetivo: ${targetUrl}`);
+
+      this.audio.src = targetUrl;
+      this.audio.setAttribute('crossorigin', 'anonymous');
       this.currentStation.set(station);
 
-      // 2. Asegurar el AudioContext (Debe activarse por gesto de usuario)
+      // El AudioContext solo se inicia si el usuario interactúa
       await this.initAudioContext();
 
-      console.log(`📡 Conectando a: ${station.name}...`);
-
-      // 3. Play
+      console.log(`📡 Intentando conectar a: ${station.name}`);
       await this.audio.play();
-      this.isPlaying.set(true);
     } catch (err) {
-      console.error('No se pudo reproducir la emisora:', err);
-      this.isPlaying.set(false);
+      console.error('Fallo en playStation:', err);
     }
   }
 
   private async initAudioContext() {
-    if (this.audioContext) {
-      if (this.audioContext.state === 'suspended') {
-        await this.audioContext.resume();
-      }
-      return;
+    if (!this.audioContext) {
+      this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+      this.source = this.audioContext.createMediaElementSource(this.audio);
+      this.analyser = this.audioContext.createAnalyser();
+      this.analyser.fftSize = 64;
+
+      this.source.connect(this.analyser);
+      this.analyser.connect(this.audioContext.destination);
+      this.animate();
     }
 
-    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-
-    // El source se crea solo UNA VEZ para este objeto audio
-    this.source = this.audioContext.createMediaElementSource(this.audio);
-    this.analyser = this.audioContext.createAnalyser();
-    this.analyser.fftSize = 64;
-
-    // FLUJO: Source -> Analyser -> Speakers
-    this.source.connect(this.analyser);
-    this.analyser.connect(this.audioContext.destination);
-
-    this.animate();
+    if (this.audioContext.state === 'suspended') {
+      await this.audioContext.resume();
+    }
   }
 
   private animate() {
@@ -121,6 +143,22 @@ export class RadioService {
       this.frequencyData.set(values);
     }
     requestAnimationFrame(() => this.animate());
+  }
+
+  private recuperarAudio() {
+    const station = this.currentStation();
+    if (station && this.isPlaying()) {
+      // Guardamos el volumen actual
+      const vol = this.audio.volume;
+
+      // Creamos una URL ligeramente distinta para romper la caché del túnel de Codespaces
+      const separator = station.url.includes('?') ? '&' : '?';
+      this.audio.src = `${this.MI_PROXY}/${station.url}${separator}retry=${Date.now()}`;
+
+      this.audio.load();
+      this.audio.volume = vol;
+      this.audio.play().catch(() => console.log('Reintento fallido, esperando al siguiente...'));
+    }
   }
 
   pause() {

@@ -1,11 +1,9 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import { invoke } from '@tauri-apps/api/core';
-import { EventsHistory } from './components/events-history/events-history';
-import { TelemetryService } from './services/telemetry.service';
 import { RouterOutlet } from '@angular/router';
-import { RadioService } from './services/radio.service';
 import { RadioComponent } from "./components/radio/radio";
+import { RadioService } from './services/radio.service';
+import { TelemetryService } from './services/telemetry.service';
 
 @Component({
   selector: 'app-root',
@@ -17,7 +15,7 @@ export class App {
   private readonly telemetryService = inject(TelemetryService);
   private radioService = inject(RadioService);
 
-  appName = 'Trucker Telemetry';
+  public readonly appName = 'Trucker Telemetry';
 
   // Exponemos los Signals del servicio para que el HTML los vea
   public telemetry = this.telemetryService.data;

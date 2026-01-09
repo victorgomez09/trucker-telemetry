@@ -1,18 +1,21 @@
-import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RadioService, RadioStation } from '../../services/radio.service';
+import { Component, computed, inject, signal } from '@angular/core';
+import { LucideAngularModule, PauseIcon, PlayIcon } from 'lucide-angular';
+import { RadioService } from '../../services/radio.service';
 
 @Component({
   selector: 'app-radio',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, LucideAngularModule],
   templateUrl: './radio.html',
   styleUrls: ['./radio.scss'],
 })
 export class RadioComponent {
   public readonly radio = inject(RadioService);
+  public readonly playIcon = PlayIcon;
+  public readonly pauseIcon = PauseIcon;
+  
   public searchTerm = signal('');
-
   public filteredStations = computed(() => {
     const term = this.searchTerm().toLowerCase();
     return this.radio
