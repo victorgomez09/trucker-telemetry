@@ -172,6 +172,18 @@ fn save_config(config: AppConfig) -> Result<(), String> {
     config.save()
 }
 
+#[derive(Serialize, Deserialize, Clone)]
+pub struct RadioConfig {
+    pub last_station_url: String,
+    pub volume: f32,
+}
+
+#[tauri::command]
+fn save_radio_settings(config: RadioConfig) {
+    // Aquí guardarías en un archivo .json local usando la crate 'confy' o similar
+    println!("Ajustes de radio guardados: Vol {}", config.volume);
+}
+
 fn main() {
     // tauri::Builder::default()
     //     .setup(|app| {

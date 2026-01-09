@@ -1,0 +1,73 @@
+<div class="flex flex-col h-screen bg-base-300 text-base-content font-sans p-4 gap-4">
+  
+  <div class="card bg-base-100 shadow-xl p-6">
+    <div class="flex justify-between items-center mb-4">
+      <h1 class="text-3xl font-black italic tracking-tighter text-primary">TRUCK RADIO FM</h1>
+      <div class="badge badge-outline gap-2">{{ filteredStations().length }} EMISORAS</div>
+    </div>
+    <div class="relative">
+      <input type="text" (input)="search($event)" placeholder="Buscar emisora o estilo..." 
+             class="input input-bordered w-full bg-base-200 pl-12 focus:border-primary" />
+      <span class="absolute left-4 top-3.5 opacity-40">🔍</span>
+    </div>
+  </div>
+
+  <div class="flex flex-grow gap-4 overflow-hidden">
+    
+    <div class="flex-grow overflow-y-auto space-y-2 pr-2 custom-scroll">
+      @for (s of filteredStations(); track s.url) {
+        <div (click)="radio.playStation(s)" 
+             class="card card-side bg-base-100 hover:bg-base-200 cursor-pointer transition-all border-l-4"
+             [class.border-primary]="radio.currentStation()?.url === s.url"
+             [class.border-transparent]="radio.currentStation()?.url !== s.url">
+          <figure class="w-16 bg-neutral flex items-center justify-center text-xl font-bold">
+            {{ s.name[0] }}
+          </figure>
+          <div class="card-body p-4 flex-row justify-between items-center">
+            <div>
+              <h3 class="font-bold uppercase text-sm truncate w-48">{{ s.name }}</h3>
+              <p class="text-[10px] opacity-50 font-bold uppercase">{{ s.genre }} | {{ s.bitrate }}kbps</p>
+            </div>
+            @if (radio.currentStation()?.url === s.url && radio.isPlaying()) {
+              <span class="loading loading-waveform loading-sm text-primary"></span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="w-80 flex flex-col gap-4">
+      <div class="card bg-neutral shadow-2xl p-6 flex-grow flex flex-col justify-end">
+        <div class="flex items-end justify-between h-32 gap-1">
+          @for (val of radio.frequencyData(); track $index) {
+            <div class="flex-1 bg-primary rounded-full min-h-[4px]" 
+                 [style.height.%]="radio.isPlaying() ? val : 5"
+                 [style.opacity]="0.3 + (val/100)"></div>
+          }
+        </div>
+        <div class="mt-6 text-center">
+          <p class="text-xs font-black text-white/40 uppercase tracking-widest mb-1">Ahora sonando</p>
+          <h2 class="text-white font-bold truncate text-lg uppercase">{{ radio.currentStation()?.name || 'Radio Apagada' }}</h2>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-xl p-6 space-y-4 border border-white/5">
+        <div class="flex items-center justify-center gap-6">
+          <button (click)="radio.isPlaying() ? radio.pause() : (radio.currentStation() ? radio.playStation(radio.currentStation()!) : null)" 
+                  class="btn btn-circle btn-primary btn-lg scale-110 shadow-lg">
+            @if (radio.isPlaying()) { ⏸ } @else { ▶ }
+          </button>
+        </div>
+        <div class="space-y-2">
+          <div class="flex justify-between text-[10px] font-bold opacity-60">
+            <span>VOLUMEN</span>
+            <span>{{ (radio.volume() * 100).toFixed(0) }}%</span>
+          </div>
+          <input type="range" min="0" max="1" step="0.01" [value]="radio.volume()" (input)="onVol($event)"
+                 class="range range-xs range-primary" />
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
