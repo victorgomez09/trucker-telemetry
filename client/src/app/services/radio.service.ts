@@ -1,6 +1,7 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 export interface RadioStation {
+  id: number;
   url: string;
   name: string;
   genre: string;
@@ -10,71 +11,116 @@ export interface RadioStation {
 
 @Injectable({ providedIn: 'root' })
 export class RadioService {
-  private audio = new Audio();
+  public audio = new Audio();
   private audioContext?: AudioContext;
   private analyser?: AnalyserNode;
-  private dataArray = new Uint8Array(0);
+  private source?: MediaElementAudioSourceNode;
 
-  // Signals para estado global
+  // Estado reactivo
   public isPlaying = signal(false);
   public currentStation = signal<RadioStation | null>(null);
-  public volume = signal(0.5);
   public frequencyData = signal<number[]>(new Array(16).fill(0));
+  public volume = signal(0.5);
 
   private rawData: string[] = [
-    "https://cadena100-cope-rrcast.flumotion.com/cope/cadena100-low.mp3|Cadena 100|Pop|ES|128",
-    "https://19993.live.streamtheworld.com/CADENADIAL.mp3|Cadena Dial|Pop|ES|128",
-    "http://playerservices.streamtheworld.com/api/livestream-redirect/CADENASER_SC|Cadena SER|Pop|ES|128",
-    "https://rtva-live-radio.flumotion.com/rtva/cfr.mp3|Canal Fiesta|radio|ES|128",
-    "https://rtva-live-radio.flumotion.com/rtva/csr.mp3|Canal Sur|radio|ES|128",
-    "http://livestreaming.esradio.fm/stream64.mp3|EsRadio|radio|ES|128",
-    "https://str1.mediatelekom.net:9950/stream|EuropaFM|Éxitos|ES|128",
-    "https://streaming12.elitecomunicacion.es/proxy/hitfmgranada/stream|Hit FM|Éxitos|ES|128",
-    "http://stm1.emiteonline.com:8003/hitradio|Hit Radio FM|Pop|ES|112",
-    "http://ibizaglobalradio.streaming-pro.com:8024|Ibiza Global Radio|radio|ES|128",
-    "http://kissfm.kissfmradio.cires21.com/kissfm.mp3|KissFM|80s|ES|128",
-    "https://s47.myradiostream.com:13914/;|Loca FM|Musica|ES|128",
-    "https://s2.we4stream.com/listen/loca_dance/live|Loca FM - Dance|Musica|ES|128",
-    "http://playerservices.streamtheworld.com/api/livestream-redirect/M80RADIO_SC|M80 Radio|80s|ES|128",
-    "https://megastar-cope-rrcast.flumotion.com/cope/megastar.mp3|MEGASTAR FM|Éxitos|ES|128",
-    "http://stream.zeno.fm/nrwv1923czzuv|Maxima FM|Electronica|ES|128",
-    "https://laradiossl.online:10307/;|Melodia FM|radio|ES|128",
-    "https://stream.zeno.fm/dzqaazsn3p8uv|OndaCero|Variedad|ES|96",
-    "https://granada-copesedes-rrcast.flumotion.com/copesedes/granada-low.mp3|Radio Cope|radio|ES|128",
-    "https://rockfm-cope-rrcast.flumotion.com/cope/rockfm-low.mp3|Rock FM|Rock|ES|96",
-    "http://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_SC|Los 40 Principales|Éxitos|ES|128",
-    "https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_CLASSIC.mp3|LOS 40 CLASSIC|80s|ES|128",
-    "https://us-b4-p-e-cg11-audio.cdn.mdstrm.com/live-audio-aw/65afe4a0357cec56667ac739|Flaix FM|Musica|CAT|128",
-    "https://azura.abcorp.es/radio/8030/live|Gozadera FM|Reggaeton|ES|128",
-    "https://rockfm-cope-rrcast.flumotion.com/cope/rockfm-low.mp3|RockFM Link2|Rock|ES|96",
-    "http://streams1.mdtradio.com:8020/mdtweb|MDT Radio|Techno|ESP|128"
+    'http://playerservices.streamtheworld.com/api/livestream-redirect/LOS40.mp3|Los 40 Principales|Éxitos|ESP|128|1',
+    'https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_CLASSIC.mp3|Los 40 Classic|Exitos de siempre|ESP|128|1',
+    'https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_DANCE.mp3|Los 40 Dance|Dance|ESP|128|1',
+    'https://playerservices.streamtheworld.com/api/livestream-redirect/LOS40_URBAN.mp3|Los 40 Urban|Reguetón|ESP|128|1',
+    'http://eu1.lhdserver.es:9056/stream|Cadena 100|Pop|ESP|320|1',
+    'https://one.cloudstreaming.eu/proxy/europa/stream|Europa FM|Exitos|ESP|128|1',
+    'https://stream.serviciospararadios.es/listen/bikini_fm/bikinifm-castellon.mp3|Bikini FM|Dance Remember|ESP|128|1',
+    'https://s47.myradiostream.com/13914/listen.mp3|Loca FM|Dance|ESP|128|1',
+    'http://ibizaglobalradio.streaming-pro.com:8024/;|Ibiza Global Radio|Dance, House|ESP|128|1',
+    'https://playerservices.streamtheworld.com/api/livestream-redirect/DIAL_ASO_ESTEPA.mp3|Cadena Dial|Música Española|ESP|128|1',
+    'https://playerservices.streamtheworld.com/api/livestream-redirect/RADIOLE.mp3|Radiolé|Flamenco|ESP|128|1',
+    'https://rockfm-cope-rrcast.flumotion.com/cope/rockfm-low.mp3|Rock-FM|Rock|ESP|128|1',
+    'https://playerservices.streamtheworld.com/api/livestream-redirect/CADENASER_ALT1.mp3|Cadena SER|Generalista, Noticias|ESP|128|1',
+    'https://dispatcher.rndfnk.com/crtve/rne1/mel/mp3/high|RNE 1 Radio Nacional de españa|Generalista, Noticias|ESP|128|1',
+    'https://dispatcher.rndfnk.com/crtve/rne5/mad/mp3/high|RNE Radio 5|Generalista, Noticias|ESP|128|1',
+    'https://dispatcher.rndfnk.com/crtve/rnerc/main/mp3/high|RNE Radio Clásica|Música Clásica|ESP|128|1',
+    'http://atlantic2689.serverprofi24.de:8110/stream|COPE|Generalista, Noticias|ESP|176|1',
+    'https://stream.zeno.fm/dzqaazsn3p8uv|Onda Cero|Generalista, Noticias|ESP|128|1',
+    'https://playerservices.streamtheworld.com/api/livestream-redirect/RAC105.mp3|RAC 105|Éxitos|CAT|128|1',
+    'http://rtva-live-radio.flumotion.com/rtva/csrcor.mp3|Canal Sur Radio|Generalista, Noticias|ESP|128|1',
+    'https://streamer97.server.aranova.cloud/mp3/live/aragonradio_teruel_96.mp3?vv=2&h=YKyQaEkABX1qOBXz85lpVQ&e=31373635383330323737&r=1642|Aragón Radio|Generalista, Noticias|ESP|96|1',
+    'https://stream.radionervion.com/listen/radio-nervion/radionervion.mp3|Radio Nervión|Éxitos de siempre|ESP|64|1',
+    'http://streaming.capsulaimposible.com:8000/stream/2/canalebro.mp3|Canal Ebro Radio|Generalista, Noticias|ESP|128|1',
+    'http://s2.voscast.com:11284/;|Radio Castilla-La Mancha|Generalista, Noticias|ESP|96|1',
+    'http://mp3-eitb.stream.flumotion.com/eitb/radioeuskadi.mp3|Radio Euskadi|Generalista, Noticias|ESP|128|1',
+    'https://live.radiovoz.es/mp3/stream_cadena.mp3|Radio Voz|Generalista, Noticias|ESP|64|1',
   ];
 
   public stations = signal<RadioStation[]>(this.parseStations());
 
   constructor() {
-    this.audio.crossOrigin = "anonymous";
-    this.audio.volume = this.volume();
+    this.audio.crossOrigin = 'anonymous';
+    this.audio.preload = 'auto';
+
+    // Logs de diagnóstico para saber qué pasa en Codespaces
+    this.audio.onplaying = () => console.log('▶ ▶ REPRODUCIENDO: El audio está saliendo.');
+    this.audio.onwaiting = () => console.log('⏳ Cargando buffer...');
+    this.audio.onerror = () => console.error('❌ Error de Audio:', this.audio.error);
   }
 
   private parseStations(): RadioStation[] {
-    return this.rawData.map(line => {
+    return this.rawData.map((line, index) => {
       const [url, name, genre, lang, bitrate] = line.split('|');
-      return { url, name, genre, lang, bitrate };
+      return { id: index, url, name, genre, lang, bitrate };
     });
   }
 
-  playStation(station: RadioStation) {
-    if (this.currentStation()?.url === station.url && this.isPlaying()) {
-      this.pause();
+  async playStation(station: RadioStation) {
+    try {
+      // 1. Resetear el stream anterior
+      this.audio.pause();
+      this.audio.src = station.url;
+      this.currentStation.set(station);
+
+      // 2. Asegurar el AudioContext (Debe activarse por gesto de usuario)
+      await this.initAudioContext();
+
+      console.log(`📡 Conectando a: ${station.name}...`);
+
+      // 3. Play
+      await this.audio.play();
+      this.isPlaying.set(true);
+    } catch (err) {
+      console.error('No se pudo reproducir la emisora:', err);
+      this.isPlaying.set(false);
+    }
+  }
+
+  private async initAudioContext() {
+    if (this.audioContext) {
+      if (this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
+      }
       return;
     }
-    this.audio.src = station.url;
-    this.audio.play().then(() => {
-      this.setupAnalyzer();
-      this.isPlaying.set(true);
-      this.currentStation.set(station);
-    }).catch(err => console.error("Error stream:", err));
+
+    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+
+    // El source se crea solo UNA VEZ para este objeto audio
+    this.source = this.audioContext.createMediaElementSource(this.audio);
+    this.analyser = this.audioContext.createAnalyser();
+    this.analyser.fftSize = 64;
+
+    // FLUJO: Source -> Analyser -> Speakers
+    this.source.connect(this.analyser);
+    this.analyser.connect(this.audioContext.destination);
+
+    this.animate();
+  }
+
+  private animate() {
+    if (this.analyser && this.isPlaying()) {
+      const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+      this.analyser.getByteFrequencyData(dataArray);
+      const values = Array.from(dataArray.slice(0, 16)).map((v) => (v / 255) * 100);
+      this.frequencyData.set(values);
+    }
+    requestAnimationFrame(() => this.animate());
   }
 
   pause() {
@@ -85,26 +131,5 @@ export class RadioService {
   updateVolume(v: number) {
     this.volume.set(v);
     this.audio.volume = v;
-  }
-
-  private setupAnalyzer() {
-    if (this.audioContext) return;
-    this.audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-    const source = this.audioContext.createMediaElementSource(this.audio);
-    this.analyser = this.audioContext.createAnalyser();
-    source.connect(this.analyser);
-    this.analyser.connect(this.audioContext.destination);
-    this.analyser.fftSize = 64;
-    this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
-    this.animate();
-  }
-
-  private animate() {
-    if (this.analyser && this.isPlaying()) {
-      this.analyser.getByteFrequencyData(this.dataArray);
-      const values = Array.from(this.dataArray.slice(0, 16)).map(v => (v / 255) * 100);
-      this.frequencyData.set(values);
-    }
-    requestAnimationFrame(() => this.animate());
   }
 }

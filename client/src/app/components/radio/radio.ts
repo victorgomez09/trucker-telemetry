@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RadioService } from '../../services/radio.service';
+import { RadioService, RadioStation } from '../../services/radio.service';
 
 @Component({
   selector: 'app-radio',
@@ -10,22 +10,22 @@ import { RadioService } from '../../services/radio.service';
   styleUrls: ['./radio.scss'],
 })
 export class RadioComponent {
-  public radio = inject(RadioService);
-  public query = signal('');
+  public readonly radio = inject(RadioService);
+  public searchTerm = signal('');
 
   public filteredStations = computed(() => {
-    const q = this.query().toLowerCase();
+    const term = this.searchTerm().toLowerCase();
     return this.radio
       .stations()
-      .filter((s) => s.name.toLowerCase().includes(q) || s.genre.toLowerCase().includes(q));
+      .filter((s) => s.name.toLowerCase().includes(term) || s.genre.toLowerCase().includes(term));
   });
 
-  search(e: Event) {
-    this.query.set((e.target as HTMLInputElement).value);
+  filterStations(event: Event) {
+    this.searchTerm.set((event.target as HTMLInputElement).value);
   }
 
-  onVol(e: Event) {
-    const val = (e.target as HTMLInputElement).value;
+  onVolumeChange(event: Event) {
+    const val = (event.target as HTMLInputElement).value;
     this.radio.updateVolume(parseFloat(val));
   }
 }

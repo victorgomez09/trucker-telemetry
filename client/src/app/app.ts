@@ -5,10 +5,11 @@ import { EventsHistory } from './components/events-history/events-history';
 import { TelemetryService } from './services/telemetry.service';
 import { RouterOutlet } from '@angular/router';
 import { RadioService } from './services/radio.service';
+import { RadioComponent } from "./components/radio/radio";
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet],
+  imports: [CommonModule, RouterOutlet, RadioComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })
