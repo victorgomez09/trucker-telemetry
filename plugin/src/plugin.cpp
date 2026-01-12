@@ -31,7 +31,10 @@ struct Ets2Data
     float speed;
     float rpm;
     int32_t gear;
+    float fuel_amount;
     float fuel_consumption;
+    float fuel_capacity;
+    float fuel_warning_factor;
     float cargo_damage;
     float cargo_weight;
 
@@ -140,6 +143,8 @@ SCSAPI_VOID telemetry_store(const scs_string_t name, const scs_u32_t index, cons
         shared_data->gear = value->value_s32.value;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_fuel_average_consumption) == 0)
         shared_data->fuel_consumption = value->value_float.value * 100.0f;
+    else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_fuel) == 0)
+        shared_data->fuel_amount = value->value_float.value * 100.0f;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_wear_chassis) == 0)
         shared_data->cargo_damage = value->value_float.value;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_navigation_speed_limit) == 0)
@@ -247,6 +252,10 @@ SCSAPI_VOID configuration_handler(const scs_event_t event, const void *const eve
                 brand = val->value.value_string.value;
             if (strcmp(val->name, "name") == 0)
                 model = val->value.value_string.value;
+            if (strcmp(val->name, SCS_TELEMETRY_CONFIG_ATTRIBUTE_fuel_capacity) == 0)
+                shared_data->fuel_capacity = val->value.value_float.value;
+            if (strcmp(val->name, SCS_TELEMETRY_CONFIG_ATTRIBUTE_fuel_warning_factor) == 0)
+                shared_data->fuel_warning_factor = val->value.value_float.value;
         }
         std::string full = brand + " " + model;
         strncpy(shared_data->truck_name, full.c_str(), 63);
@@ -327,6 +336,7 @@ PLUGIN_EXPORT SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const sc
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_speed, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_engine_rpm, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_engine_gear, SCS_U32_NIL, SCS_VALUE_TYPE_s32, 0, telemetry_store, nullptr);
+    v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_fuel, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_fuel_average_consumption, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_wear_chassis, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_navigation_speed_limit, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);

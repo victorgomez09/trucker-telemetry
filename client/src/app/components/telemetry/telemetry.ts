@@ -24,6 +24,17 @@ export class Telemetry {
     return data && data.speed > data.speed_limit + 5; // Margen de 5km/h
   });
 
+  fuelLitres = computed(() => Math.trunc((this.telemetry()?.fuel_amount / 100)))
+
+  isLowFuel = computed(() => {
+    const current = this.telemetry()?.fuel_amount || 0;
+    const capacity = this.telemetry()?.fuel_capacity || 0;
+    const warningFactor = this.telemetry()?.fuel_warning_factor || 0.15;
+
+    if (capacity === 0) return false;
+    return (current / capacity) <= warningFactor;
+  });
+
   remainingKm = computed(() => {
     const data = this.telemetry();
     if (!data || data.navigation_distance <= 0) return 0;
