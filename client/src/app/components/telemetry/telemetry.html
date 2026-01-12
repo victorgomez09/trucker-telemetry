@@ -111,7 +111,7 @@
                         <span class="text-md font-semibold">{{ telemetry().cargo_name || 'Sin carga activa' }}</span>
                         @if (telemetry().cargo_damage > 0) {
                         <span class="badge badge-error badge-sm text-[10px] font-bold">
-                            {{ telemetry().cargo_damage | percent:'1.1-1' }} DAÑO
+                            {{ (telemetry().cargo_damage * 100) | number:'1.0-0' }}% DAÑO
                         </span>
                         } @else if (telemetry().has_active_job) {
                         @if (telemetry().cargo_damage === 0) {

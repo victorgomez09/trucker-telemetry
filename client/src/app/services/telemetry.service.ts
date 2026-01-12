@@ -2,33 +2,34 @@ import { Injectable, signal, computed, isDevMode } from '@angular/core';
 import { invoke } from '@tauri-apps/api/core';
 
 const mockData = {
-  "speed": 17.17358,
-  "rpm": 1353.0471,
-  "gear": 4,
+  "speed": 44.819244,
+  "rpm": 1009.179,
+  "gear": 10,
   "fuel_consumption": 0,
-  "cargo_damage": 0,
-  "cargo_name": "Generadores de gasóleo",
+  "cargo_damage": 0.45703262,
+  "cargo_name": "Plásticos usados",
   "truck_name": "Renault Premium",
-  "city_source": "Zaragoza",
-  "city_destination": "Porto",
-  "planned_distance": 827,
-  "navigation_distance": 823000,
-  "job_income": 47775,
+  "city_source": "Bergen",
+  "city_destination": "Bergen",
+  "planned_distance": 14,
+  "navigation_distance": 4748.749,
+  "job_income": 453,
   "has_active_job": true,
   "job_finished": 0,
-  "status_message": "En ruta a Porto",
+  "status_message": "En ruta a Bergen",
+  "speed_limit": -3.6,
   "events": [
     {
       "event_type": 4,
-      "value": 0,
-      "text": "Trabajo en curso",
-      "timestamp": 8291765
+      "value": 420,
+      "text": "speeding_camera",
+      "timestamp": 2616328
     },
     {
       "event_type": 4,
-      "value": 0,
-      "text": "Trabajo en curso",
-      "timestamp": 8283406
+      "value": 400,
+      "text": "crash",
+      "timestamp": 2605921
     }
   ]
 }
@@ -52,6 +53,7 @@ export class TelemetryService {
   private async updateTelemetry() {
     try {
       const data = await invoke('read_telemetry');
+      console.log("data", data)
       this._telemetryData.set(data);
       this._isConnected.set(true);
     } catch (error) {

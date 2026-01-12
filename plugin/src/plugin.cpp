@@ -153,7 +153,64 @@ SCSAPI_VOID gameplay_handler(const scs_event_t event, const void *const event_in
 {
     const struct scs_telemetry_gameplay_event_t *ev = static_cast<const struct scs_telemetry_gameplay_event_t *>(event_info);
 
-    if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_job_delivered) == 0)
+    // --- EVENTO: MULTA ---
+    if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_player_fined) == 0)
+    {
+        int64_t amount = 0;
+        const char *offence = "unknown";
+
+        for (const scs_named_value_t *attr = ev->attributes; attr->name; ++attr)
+        {
+            if (strcmp(attr->name, SCS_TELEMETRY_GAMEPLAY_EVENT_ATTRIBUTE_fine_amount) == 0)
+            {
+                amount = attr->value.value_s64.value;
+            }
+            if (strcmp(attr->name, SCS_TELEMETRY_GAMEPLAY_EVENT_ATTRIBUTE_fine_offence) == 0)
+            {
+                offence = attr->value.value_string.value;
+            }
+        }
+        add_gameplay_event(4, amount, offence);
+    }
+
+    // --- EVENTO: PEAJE ---
+    else if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_player_tollgate_paid) == 0)
+    {
+        int64_t amount = 0;
+        for (const scs_named_value_t *attr = ev->attributes; attr->name; ++attr)
+        {
+            if (strcmp(attr->name, SCS_TELEMETRY_GAMEPLAY_EVENT_ATTRIBUTE_pay_amount) == 0)
+            {
+                amount = attr->value.value_s64.value;
+            }
+        }
+        add_gameplay_event(5, amount, "toll");
+    }
+
+    // --- EVENTO: FERRY / TREN ---
+    else if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_player_use_ferry) == 0 ||
+             strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_player_use_train) == 0)
+    {
+        int64_t amount = 0;
+        char route[128] = "transport";
+        const char *src = "";
+        const char *dst = "";
+
+        for (const scs_named_value_t *attr = ev->attributes; attr->name; ++attr)
+        {
+            if (strcmp(attr->name, SCS_TELEMETRY_GAMEPLAY_EVENT_ATTRIBUTE_pay_amount) == 0)
+            {
+                amount = attr->value.value_s64.value;
+            }
+            if (strcmp(attr->name, SCS_TELEMETRY_GAMEPLAY_EVENT_ATTRIBUTE_source_name) == 0)
+                src = attr->value.value_string.value;
+            if (strcmp(attr->name, SCS_TELEMETRY_GAMEPLAY_EVENT_ATTRIBUTE_target_name) == 0)
+                dst = attr->value.value_string.value;
+        }
+        sprintf(route, "%s -> %s", src, dst);
+        add_gameplay_event(6, amount, route);
+    }
+    else if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_job_delivered) == 0)
     {
         shared_data->job_finished = 1;
         // add_gameplay_event(2, shared_data->job_income, "Trabajo Entregado");

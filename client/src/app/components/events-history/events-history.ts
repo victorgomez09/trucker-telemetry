@@ -10,4 +10,14 @@ import { Component, input } from '@angular/core';
 export class EventsHistory {
 
   telemetry = input<any>()
+
+  parseEventText(text: string) {
+    switch (text) {
+      case "speeding_camera":
+      case "crash":
+        return "Multa"
+      default:
+        return text;
+    }
+  }
 }
