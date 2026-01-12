@@ -37,6 +37,7 @@ struct Ets2Data
 
     uint64_t job_income;
     int32_t planned_distance;
+    float navigation_distance;
     char city_source[64];
     char city_destination[64];
     char company_source[64];
@@ -143,6 +144,8 @@ SCSAPI_VOID telemetry_store(const scs_string_t name, const scs_u32_t index, cons
         shared_data->cargo_damage = value->value_float.value;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_navigation_speed_limit) == 0)
         shared_data->speed_limit = value->value_float.value * 3.6f;
+    else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_navigation_distance) == 0)
+        shared_data->navigation_distance = value->value_float.value;
 }
 
 // --- HANDLERS DE EVENTOS ---
@@ -274,6 +277,7 @@ PLUGIN_EXPORT SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const sc
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_fuel_average_consumption, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_wear_chassis, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_navigation_speed_limit, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
+    v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_navigation_distance, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
 
     if (game_log)
         game_log(SCS_LOG_TYPE_message, "[Bridge] Plugin Inicializado Correctamente");

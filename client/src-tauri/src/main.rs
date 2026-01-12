@@ -92,14 +92,18 @@ fn read_telemetry() -> Result<Ets2FrontendData, String> {
 
     unsafe {
         let raw = &*(shm.as_ptr() as *const Ets2DataRaw);
+
+        // FUNCIÓN DE PARSEO MEJORADA
+        // Limpia los nulos y caracteres basura después del primer nulo
         let parse_str = |b: &[u8]| {
-            String::from_utf8_lossy(b)
-                .trim_matches(char::from(0))
-                .to_string()
+            let bytes = b.split(|&x| x == 0).next().unwrap_or(&[]);
+            String::from_utf8_lossy(bytes).to_string()
         };
 
+        // Procesar eventos
         let mut events_vec = Vec::new();
-        for i in 0..raw.event_count.min(128) as usize {
+        let safe_event_count = raw.event_count.clamp(0, 128) as usize;
+        for i in 0..safe_event_count {
             let ev = raw.events[i];
             events_vec.push(FrontendEvent {
                 event_type: ev.event_type,
@@ -112,14 +116,15 @@ fn read_telemetry() -> Result<Ets2FrontendData, String> {
 
         let city_dest = parse_str(&raw.city_destination);
         let city_src = parse_str(&raw.city_source);
-        let has_job = !city_src.is_empty() || !city_dest.is_empty();
+
+        // Un trabajo es válido si tiene destino Y distancia planificada
+        let has_job = !city_dest.is_empty() && raw.planned_distance > 0;
 
         let status_msg = if has_job {
             format!("En ruta a {}", city_dest)
         } else {
-            match events_vec.get(0) {
+            match events_vec.first() {
                 Some(e) if e.event_type == 2 => "¡Trabajo completado!".into(),
-                Some(e) if e.event_type == 3 => "Trabajo cancelado".into(),
                 _ => "Esperando carga...".into(),
             }
         };
