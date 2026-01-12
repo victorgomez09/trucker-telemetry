@@ -1,13 +1,11 @@
-<div class="card bg-base-100 shadow-xl overflow-hidden">
-  <div
-    class="bg-primary p-4 text-primary-content font-black italic flex justify-between items-center"
-  >
+<div class="card bg-base-100 shadow overflow-hidden w-full">
+  <div class="bg-primary p-4 text-primary-content font-black italic flex justify-between items-center">
     <span>HISTORIAL DE VIAJE</span>
     <span class="badge badge-ghost">{{ telemetry().events?.length || 0 }}</span>
   </div>
 
   <div class="max-h-[400px] overflow-y-auto">
-    <table class="table table-zebra table-pin-rows">
+    <table class="table table-pin-rows">
       <thead>
         <tr>
           <th>Evento</th>
@@ -29,7 +27,7 @@
             <div class="badge badge-ghost badge-xs"></div>
             } }
           </td>
-          <td class="text-sm">{{ ev.description }}</td>
+          <td class="text-sm">{{ ev.text }}</td>
           <td class="text-right font-mono text-xs">
             {{ ev.value > 0 ? (ev.value | currency : 'EUR' : 'symbol' : '1.0-0') : '---' }}
           </td>

@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
-import { RouterOutlet, RouterLinkWithHref } from '@angular/router';
-import { RadioComponent } from "./components/radio/radio";
+import { RouterLinkWithHref, RouterOutlet } from '@angular/router';
 import { RadioService } from './services/radio.service';
 import { TelemetryService } from './services/telemetry.service';
+import { RadioComponent } from './components/radio/radio';
 
 @Component({
   selector: 'app-root',
-  imports: [CommonModule, RouterOutlet, RadioComponent, RouterLinkWithHref],
+  imports: [CommonModule, RouterOutlet, RouterLinkWithHref, RadioComponent],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

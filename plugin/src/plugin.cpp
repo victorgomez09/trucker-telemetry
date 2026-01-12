@@ -156,7 +156,7 @@ SCSAPI_VOID gameplay_handler(const scs_event_t event, const void *const event_in
     if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_job_delivered) == 0)
     {
         shared_data->job_finished = 1;
-        add_gameplay_event(2, shared_data->job_income, "Trabajo Entregado");
+        // add_gameplay_event(2, shared_data->job_income, "Trabajo Entregado");
         memset(shared_data->city_source, 0, 64);
         memset(shared_data->city_destination, 0, 64);
         for (const scs_named_value_t *attr = ev->attributes; attr->name; ++attr)
@@ -174,7 +174,7 @@ SCSAPI_VOID gameplay_handler(const scs_event_t event, const void *const event_in
     }
     else if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_job_cancelled) == 0)
     {
-        add_gameplay_event(3, 0, "Trabajo Cancelado");
+        // add_gameplay_event(3, 0, "Trabajo Cancelado");
         memset(shared_data->city_source, 0, 64);
         memset(shared_data->city_destination, 0, 64);
     }

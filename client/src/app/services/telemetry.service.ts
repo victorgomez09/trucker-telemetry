@@ -1,37 +1,37 @@
-import { Injectable, signal, computed } from '@angular/core';
+import { Injectable, signal, computed, isDevMode } from '@angular/core';
 import { invoke } from '@tauri-apps/api/core';
 
-// {
-//     "speed": 17.17358,
-//     "rpm": 1353.0471,
-//     "gear": 4,
-//     "fuel_consumption": 0,
-//     "cargo_damage": 0,
-//     "cargo_name": "Generadores de gasóleo",
-//     "truck_name": "Renault Premium",
-//     "city_source": "Zaragoza",
-//     "city_destination": "Porto",
-//     "planned_distance": 827,
-//     "navigation_distance": 823000,
-//     "job_income": 47775,
-//     "has_active_job": true,
-//     "job_finished": 0,
-//     "status_message": "En ruta a Porto",
-//     "events": [
-//         {
-//             "event_type": 4,
-//             "value": 0,
-//             "text": "Trabajo en curso",
-//             "timestamp": 8291765
-//         },
-//         {
-//             "event_type": 4,
-//             "value": 0,
-//             "text": "Trabajo en curso",
-//             "timestamp": 8283406
-//         }
-//     ]
-// }
+const mockData = {
+  "speed": 17.17358,
+  "rpm": 1353.0471,
+  "gear": 4,
+  "fuel_consumption": 0,
+  "cargo_damage": 0,
+  "cargo_name": "Generadores de gasóleo",
+  "truck_name": "Renault Premium",
+  "city_source": "Zaragoza",
+  "city_destination": "Porto",
+  "planned_distance": 827,
+  "navigation_distance": 823000,
+  "job_income": 47775,
+  "has_active_job": true,
+  "job_finished": 0,
+  "status_message": "En ruta a Porto",
+  "events": [
+    {
+      "event_type": 4,
+      "value": 0,
+      "text": "Trabajo en curso",
+      "timestamp": 8291765
+    },
+    {
+      "event_type": 4,
+      "value": 0,
+      "text": "Trabajo en curso",
+      "timestamp": 8283406
+    }
+  ]
+}
 
 @Injectable({
   providedIn: 'root',
@@ -51,9 +51,14 @@ export class TelemetryService {
 
   private async updateTelemetry() {
     try {
-      const data = await invoke('read_telemetry');
-      this._telemetryData.set(data);
-      this._isConnected.set(true);
+      if (isDevMode()) {
+        this._telemetryData.set(mockData);
+        this._isConnected.set(true);
+      } else {
+        const data = await invoke('read_telemetry');
+        this._telemetryData.set(data);
+        this._isConnected.set(true);
+      }
     } catch (error) {
       this._isConnected.set(false);
       this._telemetryData.set(null);

@@ -3,7 +3,6 @@
     windows_subsystem = "windows"
 )]
 
-mod config;
 use serde::{Deserialize, Serialize};
 use shared_memory::ShmemConf;
 
@@ -88,12 +87,24 @@ fn read_telemetry() -> Result<Ets2FrontendData, String> {
                 .os_id(&format!("Global\\{}", SHMEM_NAME))
                 .open()
         })
-        .map_err(|_| "Sin conexión con ETS2".to_string())?;
+        .map_err(|_| "Juego no detectado".to_string())?;
+
+    if shm.len() < std::mem::size_of::<Ets2DataRaw>() {
+        return Err(format!(
+            "Error de versión: El plugin envía {} bytes, pero Rust espera {}. Recompila el plugin.",
+            shm.len(),
+            std::mem::size_of::<Ets2DataRaw>()
+        ));
+    }
+
+    let ptr = shm.as_ptr();
+    if ptr.is_null() {
+        return Err("Puntero de memoria nulo".to_string());
+    }
 
     unsafe {
         let raw = &*(shm.as_ptr() as *const Ets2DataRaw);
 
-        // FUNCIÓN DE PARSEO MEJORADA
         // Limpia los nulos y caracteres basura después del primer nulo
         let parse_str = |b: &[u8]| {
             let bytes = b.split(|&x| x == 0).next().unwrap_or(&[]);

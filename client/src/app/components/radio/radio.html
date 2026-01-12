@@ -1,125 +1,93 @@
-<div class="flex flex-col h-screen bg-base-300 overflow-hidden">
-  <div class="p-6 bg-base-100 shadow-xl border-b border-white/5 flex justify-between items-center">
-    <div>
-      <h2 class="text-2xl font-black italic tracking-tighter text-primary">TRUCK RADIO SPAIN</h2>
-      <div class="flex items-center gap-2 mt-1">
-        <span class="relative flex h-2 w-2">
-          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-          <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-        </span>
-        <p class="text-[10px] font-bold opacity-50 uppercase tracking-widest">Señal de Satélite Activa</p>
-      </div>
-    </div>
-    
-    <div class="relative w-72">
-      <input 
-        type="text" 
-        (input)="filterStations($event)"
-        placeholder="Buscar emisora o género..." 
-        class="input input-bordered w-full bg-base-200 focus:border-primary pl-10 h-10 text-sm" />
-      <span class="absolute left-3 top-2.5 opacity-30">🔍</span>
-    </div>
-  </div>
-
-  <div class="flex flex-grow overflow-hidden">
-    <div class="flex-grow overflow-y-auto p-4 space-y-2 custom-scroll">
-      @for (s of filteredStations(); track s.id) {
-        <div 
-          (click)="radio.playStation(s)"
-          class="group flex items-center gap-4 p-3 rounded-2xl transition-all cursor-pointer border border-transparent"
-          [class.bg-primary]="radio.currentStation()?.id === s.id"
-          [class.text-primary-content]="radio.currentStation()?.id === s.id"
-          [class.bg-base-100]="radio.currentStation()?.id !== s.id"
-          [class.hover:bg-base-200]="radio.currentStation()?.id !== s.id">
-          
-          <div class="relative w-12 h-12 flex-shrink-0">
-            <div class="absolute inset-0 bg-neutral rounded-xl flex items-center justify-center font-black text-xs group-hover:scale-90 transition-transform">
-              {{ s.name.substring(0,2).toUpperCase() }}
-            </div>
-            @if (radio.currentStation()?.id === s.id && radio.isPlaying()) {
-              <div class="absolute inset-0 bg-primary/40 rounded-xl flex items-center justify-center backdrop-blur-[2px]">
-                <span class="loading loading-bars loading-xs"></span>
+<div class="card bg-base-100 shadow p-4 w-full">
+  <div class="card-body p-2">
+    <div class="flex items-center justify-between mx-auto gap-4 w-full">
+      <div class="flex items-center gap-4 w-1/4">
+        <div class="dropdown dropdown-bottom">
+          <label tabindex="0"
+            class="btn btn-ghost btn-circle avatar placeholder bg-neutral hover:bg-primary transition-colors">
+            <div class="avatar avatar-placeholder">
+              <div class="bg-neutral text-neutral-content w-8 rounded-full">
+                @if (radio.currentStation()) {
+                <span class="text-xs">{{ radio.currentStation()?.name?.substring(0,2) }}</span>
+                } @else {
+                <span>📻</span>
+                }
               </div>
+            </div>
+          </label>
+
+          <div tabindex="0"
+            class="dropdown-content z-[100] menu p-2 shadow-2xl bg-base-200 rounded-box w-80 mt-0 border border-white/10">
+            <div class="p-2">
+              <input type="text" (input)="filterStations($event)" placeholder="Buscar emisora..."
+                class="input input-sm input-bordered w-full mb-2 bg-base-300" />
+            </div>
+            <ul class="max-h-60 overflow-y-auto custom-scroll">
+              @for (s of filteredStations(); track s.id) {
+              <li>
+                <a (click)="radio.playStation(s)" [class.active]="radio.currentStation()?.id === s.id"
+                  class="flex justify-between">
+                  <span>{{ s.name }}</span>
+                  <span class="text-[10px] opacity-40">{{ s.genre }}</span>
+                </a>
+              </li>
+              }
+            </ul>
+          </div>
+        </div>
+
+        <div class="hidden md:block overflow-hidden">
+          <h2 class="text-sm font-black truncate uppercase tracking-tight">
+            {{ radio.currentStation()?.name || 'Sintoniza una emisora' }}
+          </h2>
+          <div class="flex items-center gap-2">
+            @if (radio.isPlaying()) {
+            <span class="text-[10px] text-primary font-bold animate-pulse">EN DIRECTO</span>
             }
-          </div>
-
-          <div class="flex-grow min-w-0">
-            <div class="flex flex-col gap-2">
-              <h3 class="font-bold text-sm truncate uppercase tracking-tight">{{ s.name }}</h3>
-              <span class="opacity-60 text-[10px] font-semibold">{{ s.genre }}</span>
-            </div>
-          </div>
-
-          <div class="text-[10px] font-bold opacity-40 px-2 uppercase">
-            {{ s.lang }}
+            <span class="text-[10px] opacity-50 font-semibold">{{ radio.currentStation()?.genre || 'Truck Radio Spain'
+              }}</span>
           </div>
         </div>
-      }
-    </div>
+      </div>
 
-    <div class="w-80 bg-base-200/50 border-l border-white/5 p-6 flex flex-col gap-6">
-      <div class="card bg-neutral shadow-2xl p-6 aspect-square flex flex-col justify-end overflow-hidden relative">
-        <div class="absolute top-4 right-4 opacity-10">
-          <svg class="w-12 h-12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+      <div class="flex flex-col items-center gap-1 flex-grow">
+        <div class="flex items-center gap-4">
+          <lucide-angular (click)="prevStation()" [img]="skipBackIcon"
+            class="cursor-pointer hover:text-primary"></lucide-angular>
+
+          <button
+            (click)="radio.isPlaying() ? radio.pause() : (radio.currentStation() ? radio.playStation(radio.currentStation()!) : null)"
+            class="btn btn-circle btn-primary btn-lg shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+            @if (radio.isPlaying()) {
+            <lucide-angular [img]="pauseIcon"></lucide-angular>
+            } @else {
+            <lucide-angular [img]="playIcon"></lucide-angular>
+            }
+          </button>
+
+          <lucide-angular (click)="nextStation()" [img]="skipNextIcon"
+            class="cursor-pointer hover:text-primary"></lucide-angular>
         </div>
 
-        <div class="flex items-end justify-between h-32 gap-1.5 px-2">
-          @for (value of radio.frequencyData(); track $index) {
-            <!-- class="flex-1 bg-gradient-to-t from-primary via-secondary to-accent rounded-full transition-all duration-75 ease-out" -->
-            <div 
-              class="flex-1 bg-secondary rounded-full transition-all duration-75 ease-out"
-              [style.height.%]="radio.isPlaying() ? (value + 5) : 8"
-              [style.opacity]="0.4 + (value / 100)">
-            </div>
+        <div class="flex items-end gap-0.5 h-3">
+          @for (value of radio.frequencyData().slice(0, 20); track $index) {
+          <div class="w-1 bg-primary rounded-full transition-all duration-75"
+            [style.height.%]="radio.isPlaying() ? (value + 10) : 20" [style.opacity]="0.3 + (value / 100)">
+          </div>
           }
         </div>
       </div>
 
-      <div class="text-center space-y-1">
-        <p class="text-[10px] font-black opacity-40 uppercase tracking-[0.2em]">Escuchando</p>
-        <h2 class="text-xl font-bold truncate">
-          {{ radio.currentStation()?.name || 'Sintonizador Vacío' }}
-        </h2>
-        <p class="text-xs text-primary font-medium italic">
-          {{ radio.currentStation()?.genre || 'Selecciona una frecuencia' }}
-        </p>
-      </div>
-
-      <div class="card bg-base-100 p-4 shadow-lg space-y-4">
-        <div class="flex justify-center items-center gap-4">
-          <button 
-            (click)="radio.isPlaying() ? radio.pause() : (radio.currentStation() ? radio.playStation(radio.currentStation()!) : null)"
-            class="btn btn-circle btn-primary btn-lg shadow-xl shadow-primary/20 transition-transform active:scale-90">
-            @if (radio.isPlaying()) {
-              <span class="text-2xl">
-                <lucide-icon [img]="pauseIcon" class="pause"></lucide-icon>
-              </span>
-            } @else {
-              <span class="text-2xl ml-1">
-                <lucide-icon [img]="playIcon" class="play"></lucide-icon>
-              </span>
-            }
-          </button>
-        </div>
-
-        <div class="space-y-2">
-          <div class="flex justify-between items-center text-[10px] font-bold opacity-50">
-            <span>VOLUMEN</span>
-            <span>{{ (radio.volume() * 100).toFixed(0) }}%</span>
-          </div>
-          <input 
-            type="range" min="0" max="1" step="0.01" 
-            [value]="radio.volume()" 
-            (input)="onVolumeChange($event)"
+      <div class="flex items-center justify-end gap-4 w-1/4">
+        <div class="flex items-center gap-2 w-32">
+          <lucide-angular [img]="volumeIcon" class="size-4"></lucide-angular>
+          <input type="range" min="0" max="1" step="0.01" [value]="radio.volume()" (input)="onVolumeChange($event)"
             class="range range-xs range-primary" />
         </div>
+        <div class="badge badge-outline text-[10px] font-mono">
+          {{ (radio.volume() * 100).toFixed(0) }}%
+        </div>
       </div>
-
-      <div class="alert bg-base-100/30 border-none p-2 text-[10px] flex gap-2">
-        <span>⚠️</span>
-        <span class="opacity-60 italic">Recuerda mantener la vista en la carretera mientras conduces.</span>
-      </div>
-
     </div>
   </div>
 </div>
