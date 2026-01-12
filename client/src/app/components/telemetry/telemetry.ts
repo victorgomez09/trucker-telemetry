@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, OnInit, signal, Signal } from '@angular/core';
 import { EventsHistory } from '../events-history/events-history';
 import { TelemetryService } from '../../services/telemetry.service';
 import { CommonModule } from '@angular/common';
@@ -12,10 +12,12 @@ import { CommonModule } from '@angular/common';
 export class Telemetry {
   private readonly telemetryService = inject(TelemetryService);
 
-  telemetry = input<any>();
+  telemetry = this.telemetryService.data;
 
   hasJob = computed(() => {
     const data = this.telemetry();
+    console.log('data', data)
+    console.log('return ', (data && data.city_source && data.city_source.trim() !== '' && data.job_finished === 0))
     return data && data.city_source && data.city_source.trim() !== '' && data.job_finished === 0;
   });
 

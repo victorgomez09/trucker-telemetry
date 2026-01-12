@@ -1,0 +1,26 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Compilar DLL ETS2",
+            "type": "shell",
+            "command": "cl.exe",
+            "args": [
+                "/LD",
+                "/O2",
+                "/I",
+                "${workspaceFolder}/include",
+                "src/plugin.cpp",
+                "/Fe:",
+                "${workspaceFolder}/build/telemetry_rust_cpp.dll",
+                "User32.lib",
+                "Gdi32.lib"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": "$msCompile"
+        }
+    ]
+}

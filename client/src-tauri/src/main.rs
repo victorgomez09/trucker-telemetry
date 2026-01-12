@@ -4,224 +4,150 @@
 )]
 
 mod config;
-mod telemetry;
-
-use bincode;
-use config::AppConfig;
-use serde::Serialize;
-use serde_json;
+use serde::{Deserialize, Serialize};
 use shared_memory::ShmemConf;
-use std::slice;
-use std::thread;
-use std::time::Duration;
-use tauri::command;
-use tauri::Emitter;
-use telemetry::TelemetryData;
 
 const SHMEM_NAME: &str = "ETS2_RUST_SHMEM";
 
 #[repr(C, packed)]
 #[derive(Clone, Copy)]
 pub struct GameplayEvent {
-    pub type: i32,
+    pub event_type: i32,
     pub value: i64,
-    pub description: [u8; 128],
+    pub text: [u8; 128],
     pub timestamp: u64,
 }
 
 #[repr(C, packed)]
 #[derive(Clone, Copy)]
-pub struct Ets2Data {
+pub struct Ets2DataRaw {
     pub speed: f32,
     pub rpm: f32,
     pub gear: i32,
     pub fuel_consumption: f32,
-
     pub cargo_damage: f32,
     pub cargo_weight: f32,
     pub job_income: u64,
     pub planned_distance: i32,
+    pub navigation_distance: f32,
     pub city_source: [u8; 64],
     pub city_destination: [u8; 64],
     pub company_source: [u8; 64],
     pub company_destination: [u8; 64],
     pub cargo_name: [u8; 64],
     pub truck_name: [u8; 64],
-
+    pub last_refuel_amount: f32,
+    pub last_refuel_cost: f32,
+    pub refuel_event_triggered: i32,
     pub event_count: i32,
     pub next_event_index: i32,
     pub events: [GameplayEvent; 128],
-
-    pub has_active_job: bool,
-    pub status_message: String,
-    pub job_finished: i32
-}
-
-impl Default for Ets2Data {
-    fn default() -> Self {
-        unsafe { std::mem::zeroed() }
-    }
-}
-
-#[tauri::command]
-fn read_telemetry() -> Result<Ets2Data, String> {
-    // 1. Intentamos el nombre estándar
-    let shm_id = "ETS2_RUST_SHMEM";
-
-    let shm = ShmemConf::new()
-        .os_id(shm_id)
-        .open()
-        .or_else(|_| {
-            // 2. Fallback: Intentamos con el prefijo Global (por si el juego escaló privilegios)
-            ShmemConf::new()
-                .os_id(&format!("Global\\{}", shm_id))
-                .open()
-        })
-        .or_else(|_| {
-            // 3. Fallback: Intentamos con el prefijo Local
-            ShmemConf::new().os_id(&format!("Local\\{}", shm_id)).open()
-        })
-        .map_err(|_| "Telemetría no encontrada. ¿Está el camión en marcha?".to_string())?;
-
-    unsafe {
-        let data_ptr = shm.as_ptr() as *const Ets2Data;
-        let parse = |b: &[u8]| String::from_utf8_lossy(b).trim_matches(char::from(0)).to_string();
-
-        // Procesar la lista de eventos
-        let mut events_vec = Vec::new();
-        for i in 0..(*data_ptr).event_count as usize {
-            let ev = (*data_ptr).events[i];
-            events_vec.push(FrontendEvent {
-                event_type: ev.event_type,
-                value: ev.value,
-                text: parse(&ev.text),
-                timestamp: ev.timestamp,
-            });
-        }
-        
-        // Opcional: Ordenar por timestamp para que el más nuevo esté arriba
-        events_vec.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
-
-        let has_job = !d.city_source[0] == 0; // Si la ciudad de origen no está vacía
-
-        // Lógica simple de mensajes basada en el último evento del historial
-        let status_msg = if !has_job {
-            // Comprobar si el último evento fue una entrega o cancelación
-            match d.events.iter().find(|e| e.event_type == 2 || e.event_type == 3) {
-                Some(e) if e.event_type == 2 => "¡Trabajo completado con éxito!".to_string(),
-                Some(e) if e.event_type == 3 => "Trabajo cancelado".to_string(),
-                _ => "No hay trabajo en curso".to_string(),
-            }
-        } else {
-            format!("En ruta a {}", parse(&d.city_destination))
-        };
-
-        let truck_name_str = String::from_utf8_lossy(&data.truck_name)
-            .trim_matches(char::from(0))
-            .to_string();
-
-        data_ptr.events = events_vec.try_into().unwrap_or([Default::default(); 128]);
-        data_ptr.has_active_job = has_job;
-        data_ptr.status_message = status_msg;
-        data_ptr.truck_name = truck_name_str;
-        Ok(*data_ptr)
-    }
-}
-
-#[tauri::command]
-fn reset_job_status() -> Result<(), String> {
-    let shm = ShmemConf::new().os_id("ETS2_RUST_SHMEM").open().map_err(|e| e.to_string())?;
-    unsafe {
-        let d = shm.as_ptr() as *mut Ets2Data;
-        (*d).job_finished = 0;
-        (*d).city_source[0] = 0; // Limpiamos origen para indicar que no hay trabajo
-    }
-    // Opcional: Borrar el archivo binario de cache aquí también
-    Ok(())
-}
-
-#[tauri::command]
-async fn submit_job(data: Ets2Data) -> Result<String, String> {
-    let client = reqwest::Client::new();
-    let response = client.post("http://localhost:8080/api/v1/jobs/report")
-        .json(&data)
-        .send()
-        .await;
-
-    match response {
-        Ok(res) if res.status().is_success() => {
-            // ÉXITO: Borramos el archivo de caché (Modo Online)
-            delete_cache_file(); 
-            Ok("Trabajo enviado correctamente".into())
-        },
-        _ => {
-            // ERROR (Offline): NO borramos el archivo.
-            // Al reiniciar la app, el Plugin leerá el .bin y Angular lo volverá a mostrar
-            Err("Sin conexión. El trabajo se ha guardado localmente.".into())
-        }
-    }
-}
-
-#[tauri::command]
-fn get_config() -> AppConfig {
-    AppConfig::load()
-}
-
-#[tauri::command]
-fn save_config(config: AppConfig) -> Result<(), String> {
-    config.save()
+    pub job_finished: i32,
+    pub x: f32,
+    pub y: f32,
+    pub z: f32,
+    pub speed_limit: f32,
+    pub is_cheater: i32,
 }
 
 #[derive(Serialize, Deserialize, Clone)]
-pub struct RadioConfig {
-    pub last_station_url: String,
-    pub volume: f32,
+pub struct FrontendEvent {
+    pub event_type: i32,
+    pub value: i64,
+    pub text: String,
+    pub timestamp: u64,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct Ets2FrontendData {
+    pub speed: f32,
+    pub rpm: f32,
+    pub gear: i32,
+    pub fuel_consumption: f32,
+    pub cargo_damage: f32,
+    pub cargo_name: String,
+    pub truck_name: String,
+    pub city_source: String,
+    pub city_destination: String,
+    pub planned_distance: i32,
+    pub navigation_distance: f32,
+    pub job_income: u64,
+    pub has_active_job: bool,
+    pub job_finished: i32,
+    pub status_message: String,
+    pub events: Vec<FrontendEvent>,
 }
 
 #[tauri::command]
-fn save_radio_settings(config: RadioConfig) {
-    // Aquí guardarías en un archivo .json local usando la crate 'confy' o similar
-    println!("Ajustes de radio guardados: Vol {}", config.volume);
+fn read_telemetry() -> Result<Ets2FrontendData, String> {
+    let shm = ShmemConf::new()
+        .os_id(SHMEM_NAME)
+        .open()
+        .or_else(|_| {
+            ShmemConf::new()
+                .os_id(&format!("Global\\{}", SHMEM_NAME))
+                .open()
+        })
+        .map_err(|_| "Sin conexión con ETS2".to_string())?;
+
+    unsafe {
+        let raw = &*(shm.as_ptr() as *const Ets2DataRaw);
+        let parse_str = |b: &[u8]| {
+            String::from_utf8_lossy(b)
+                .trim_matches(char::from(0))
+                .to_string()
+        };
+
+        let mut events_vec = Vec::new();
+        for i in 0..raw.event_count.min(128) as usize {
+            let ev = raw.events[i];
+            events_vec.push(FrontendEvent {
+                event_type: ev.event_type,
+                value: ev.value,
+                text: parse_str(&ev.text),
+                timestamp: ev.timestamp,
+            });
+        }
+        events_vec.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
+
+        let city_dest = parse_str(&raw.city_destination);
+        let city_src = parse_str(&raw.city_source);
+        let has_job = !city_src.is_empty() || !city_dest.is_empty();
+
+        let status_msg = if has_job {
+            format!("En ruta a {}", city_dest)
+        } else {
+            match events_vec.get(0) {
+                Some(e) if e.event_type == 2 => "¡Trabajo completado!".into(),
+                Some(e) if e.event_type == 3 => "Trabajo cancelado".into(),
+                _ => "Esperando carga...".into(),
+            }
+        };
+
+        Ok(Ets2FrontendData {
+            speed: raw.speed,
+            rpm: raw.rpm,
+            gear: raw.gear,
+            fuel_consumption: raw.fuel_consumption,
+            navigation_distance: raw.navigation_distance,
+            cargo_damage: raw.cargo_damage,
+            truck_name: parse_str(&raw.truck_name),
+            city_destination: city_dest,
+            city_source: city_src,
+            cargo_name: parse_str(&raw.cargo_name),
+            has_active_job: has_job,
+            planned_distance: raw.planned_distance,
+            job_finished: raw.job_finished,
+            job_income: raw.job_income,
+            status_message: status_msg,
+            events: events_vec,
+        })
+    }
 }
 
 fn main() {
-    // tauri::Builder::default()
-    //     .setup(|app| {
-    //         let app_handle = app.handle().clone();
-    //         // Thread que envía eventos push a Angular
-    //         thread::spawn(move || {
-    //             loop {
-    //                 if let Ok(shmem) = ShmemConf::new().os_id(SHMEM_NAME).open() {
-    //                     println!("Shared memory accessed");
-    //                     let ptr = shmem.as_ptr();
-    //                     let len = shmem.len();
-    //                     let slice: &mut [u8] = unsafe { slice::from_raw_parts_mut(ptr, len) };
-    //                     if let Ok(data) = bincode::deserialize::<TelemetryData>(slice) {
-    //                         println!("Telemetry data deserialized");
-    //                         let json = serde_json::to_string(&data).unwrap();
-    //                         println!("Emitting telemetry data: {}", json);
-    //                         app_handle.emit("telemetry:update", json).unwrap();
-    //                     }
-    //                 }
-    //                 thread::sleep(Duration::from_millis(100)); // 10Hz
-    //             }
-    //         });
-    //         Ok(())
-    //     })
-    //     .invoke_handler(tauri::generate_handler![
-    //         read_telemetry,
-    //         get_config,
-    //         save_config
-    //     ])
-    //     .run(tauri::generate_context!())
-    //     .expect("error while running tauri application");
     tauri::Builder::default()
-        // REGISTRO DEL COMANDO
-        .invoke_handler(tauri::generate_handler![
-            read_telemetry,
-            get_config,
-            save_config
-        ])
+        .invoke_handler(tauri::generate_handler![read_telemetry])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

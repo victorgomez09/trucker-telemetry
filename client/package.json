@@ -9,7 +9,7 @@
     "tauri:serve": "ng build --watch --configuration development && tauri dev",
     "tauri:build": "ng build --prod && tauri build",
     "test": "ng test",
-    "postinstall": "bash scripts/setup‑maps.sh"
+    "pooooostinstall": "bash scripts/setup‑maps.sh"
   },
   "prettier": {
     "printWidth": 100,
