@@ -51,17 +51,17 @@ export class TelemetryService {
 
   private async updateTelemetry() {
     try {
+      const data = await invoke('read_telemetry');
+      this._telemetryData.set(data);
+      this._isConnected.set(true);
+    } catch (error) {
       if (isDevMode()) {
         this._telemetryData.set(mockData);
         this._isConnected.set(true);
       } else {
-        const data = await invoke('read_telemetry');
-        this._telemetryData.set(data);
-        this._isConnected.set(true);
+        this._isConnected.set(false);
+        this._telemetryData.set(null);
       }
-    } catch (error) {
-      this._isConnected.set(false);
-      this._telemetryData.set(null);
     }
   }
 

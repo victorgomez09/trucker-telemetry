@@ -74,6 +74,7 @@ pub struct Ets2FrontendData {
     pub has_active_job: bool,
     pub job_finished: i32,
     pub status_message: String,
+    pub speed_limit: f32,
     pub events: Vec<FrontendEvent>,
 }
 
@@ -152,6 +153,7 @@ fn read_telemetry() -> Result<Ets2FrontendData, String> {
             city_source: city_src,
             cargo_name: parse_str(&raw.cargo_name),
             has_active_job: has_job,
+            speed_limit: raw.speed_limit,
             planned_distance: raw.planned_distance,
             job_finished: raw.job_finished,
             job_income: raw.job_income,

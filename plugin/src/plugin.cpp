@@ -165,10 +165,6 @@ SCSAPI_VOID gameplay_handler(const scs_event_t event, const void *const event_in
             {
                 float km = attr->value.value_float.value;
                 shared_data->planned_distance = (int32_t)km;
-                char b[256];
-                sprintf(b, "[Bridge] Scan Result -> Planned distance: '%s'",
-                        shared_data->planned_distance);
-                game_log(SCS_LOG_TYPE_message, b);
             }
         }
     }
@@ -251,7 +247,7 @@ SCSAPI_VOID configuration_handler(const scs_event_t event, const void *const eve
         }
 
         shared_data->job_finished = 0;
-        add_gameplay_event(4, 0, "Trabajo en curso");
+        // add_gameplay_event(4, 0, "Trabajo en curso");
         save_to_disk();
     }
 }
