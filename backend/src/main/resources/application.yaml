@@ -17,9 +17,17 @@ spring:
     enabled: true
     change-log: classpath:db/changelog/db.changelog-master.xml
 
+  jackson:
+    property-naming-strategy: SNAKE_CASE
+
 logging:
   pattern:
     console: "%d %-5level %logger : %msg%n"
   level:
     org.springframework: info
     org.hibernate: debug
+
+# APP
+trucker:
+  economy:
+    fuel-price-per-liter: 1.45

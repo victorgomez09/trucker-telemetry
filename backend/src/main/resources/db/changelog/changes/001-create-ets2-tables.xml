@@ -40,30 +40,18 @@
 
     <changeSet id="3" author="viti">
         <addColumn tableName="jobs">
-            <column name="truck_model" type="VARCHAR(64)" />
-            <column name="total_fuel_consumed" type="FLOAT" />
+            <column name="truck_name" type="VARCHAR(64)" />
         </addColumn>
     </changeSet>
 
     <changeSet id="4" author="viti">
         <addColumn tableName="jobs">
-            <column name="truck_name" type="VARCHAR(64)" />
+            <column name="source_company" type="VARCHAR(255)" />
+            <column name="destination_company" type="VARCHAR(255)" />
+            <column name="fuel_comsumption" type="FLOAT" />
+            <column name="total_fuel_liters" type="FLOAT" />
+            <column name="fuel_cost" type="FLOAT" />
         </addColumn>
-    </changeSet>
-
-    <changeSet id="5" author="viti">
-        <createTable tableName="refuels">
-            <column name="id" type="BIGINT" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false" />
-            </column>
-            <column name="job_id" type="BIGINT">
-                <constraints foreignKeyName="fk_refuel_job" referencedTableName="jobs"
-                    referencedColumnNames="id" />
-            </column>
-            <column name="liters" type="FLOAT" />
-            <column name="total_cost" type="FLOAT" />
-            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP" />
-        </createTable>
     </changeSet>
 
 </databaseChangeLog>

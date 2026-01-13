@@ -36,7 +36,8 @@ struct Ets2Data
     float fuel_capacity;
     float fuel_warning_factor;
     float cargo_damage;
-    float cargo_weight;
+    float cargo_mass;
+    uint32_t job_xp;
 
     uint64_t job_income;
     int32_t planned_distance;
@@ -48,8 +49,7 @@ struct Ets2Data
     char cargo_name[64];
     char truck_name[64];
 
-    float last_refuel_amount;
-    float last_refuel_cost;
+    float total_fuel_liters;
     int32_t refuel_event_triggered;
 
     int32_t event_count;
@@ -68,6 +68,9 @@ HANDLE hMapFile = NULL;
 Ets2Data *shared_data = nullptr;
 scs_log_t game_log = nullptr;
 std::string dynamic_backup_path;
+
+float last_fuel_level = -1.0f;
+bool is_refueling = false;
 
 // --- PERSISTENCIA ---
 std::string get_ets2_config_path()
@@ -143,14 +146,29 @@ SCSAPI_VOID telemetry_store(const scs_string_t name, const scs_u32_t index, cons
         shared_data->gear = value->value_s32.value;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_fuel_average_consumption) == 0)
         shared_data->fuel_consumption = value->value_float.value * 100.0f;
-    else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_fuel) == 0)
-        shared_data->fuel_amount = value->value_float.value * 100.0f;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_wear_chassis) == 0)
         shared_data->cargo_damage = value->value_float.value;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_navigation_speed_limit) == 0)
         shared_data->speed_limit = value->value_float.value * 3.6f;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_navigation_distance) == 0)
         shared_data->navigation_distance = value->value_float.value;
+    if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_fuel) == 0) {
+        float current_fuel = value->value_float.value;
+        // Si el combustible sube más de 1 litro entre ticks, está repostando
+        if (last_fuel_level > 0 && current_fuel > (last_fuel_level + 1.0f)) {
+            float refueled_amount = current_fuel - last_fuel_level;
+            shared_data->total_fuel_liters += refueled_amount;
+            if (!is_refueling) {
+                add_gameplay_event(7, (int64_t)estimated_cost, "Repostaje");
+                is_refueling = true;
+            }
+        } else {
+            is_refueling = false;
+        }
+
+        shared_data->fuel_amount = current_fuel;
+        last_fuel_level = current_fuel;
+    }
 }
 
 // --- HANDLERS DE EVENTOS ---
@@ -228,6 +246,9 @@ SCSAPI_VOID gameplay_handler(const scs_event_t event, const void *const event_in
                 float km = attr->value.value_float.value;
                 shared_data->planned_distance = (int32_t)km;
             }
+            if (strcmp(attr->name, SCS_TELEMETRY_GAMEPLAY_EVENT_ATTRIBUTE_earned_xp) == 0) {
+                shared_data->job_xp = attr->value.value_u32.value;
+            }
         }
     }
     else if (strcmp(ev->id, SCS_TELEMETRY_GAMEPLAY_EVENT_job_cancelled) == 0)
@@ -301,6 +322,9 @@ SCSAPI_VOID configuration_handler(const scs_event_t event, const void *const eve
             else if (strcmp(attr->name, "income") == 0)
             {
                 shared_data->job_income = attr->value.value_u64.value;
+            }
+            else if (strcmp(attr->name, SCS_TELEMETRY_CONFIG_ATTRIBUTE_cargo_mass) == 0) {
+                shared_data->cargo_mass = attr->value.value_float.value;
             }
         }
 

@@ -27,7 +27,7 @@ public class JobEventEntity {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    private EventTypeEnum type;
+    private JobEventTypeEnum type;
 
     private String description;
 

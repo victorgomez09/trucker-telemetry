@@ -9,5 +9,7 @@
     <property name="now" value="CURRENT_TIMESTAMP" dbms="mysql,oracle"/>
 
     <include file="db/changelog/changes/001-create-ets2-tables.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changes/002-create-user-tables.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changes/003-alter-jobs-table.xml" relativeToChangelogFile="false"/>
 
     </databaseChangeLog>

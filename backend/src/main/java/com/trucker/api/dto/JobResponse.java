@@ -2,7 +2,7 @@ package com.trucker.api.dto;
 
 import java.util.List;
 
-public record JobDto(
+public record JobResponse(
     Long id,
     String citySource,
     String cityDestination,
@@ -10,6 +10,6 @@ public record JobDto(
     Long jobIncome,
     Integer plannedDistance,
     Float cargoDamage,
-    List<JobEventDto> events
+    List<JobEventResponse> events
 ) {
 }

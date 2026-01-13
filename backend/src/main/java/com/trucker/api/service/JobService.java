@@ -1,13 +1,17 @@
 package com.trucker.api.service;
 
+import java.util.Date;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.trucker.api.entity.JobEntity;
 import com.trucker.api.entity.JobEventEntity;
-import com.trucker.api.entity.RefuelEntity;
+import com.trucker.api.entity.JobEventTypeEnum;
+import com.trucker.api.entity.UserEntity;
 import com.trucker.api.repository.JobRepository;
+import com.trucker.api.repository.UserRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -17,65 +21,58 @@ import lombok.RequiredArgsConstructor;
 public class JobService {
 
     private final JobRepository jobRepository;
+    private final UserRepository userRepository;
 
-    public List<JobEntity> getAllJobs() {
-        return jobRepository.findAll();
+    @Value("${trucker.economy.fuel-price-per-liter}")
+    private double fuelPrice;
+
+    public List<JobEntity> getJobsForCurrentUser(String username) {
+        return jobRepository.findByUserUsernameOrderByCreatedAtDesc(username);
     }
 
-    public JobEntity getJobById(Long id) {
-        return jobRepository.findById(id).orElse(null);
-    }
-
-    /**
-     * Procesa el reporte final de un trabajo.
-     * Calcula gastos, beneficios netos y vincula las relaciones.
-     */
     @Transactional
-    public JobEntity processAndSaveJob(JobEntity job) {
-        // 1. Vincular los eventos (Multas, Peajes) al objeto Job
-        if (job.getEvents() != null) {
-            job.getEvents().forEach(event -> event.setJob(job));
-        }
+    public JobEntity processAndSaveJob(JobEntity job, String username) {
+        System.out.println("job income: " + job.getIncome());
+        UserEntity user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        job.setUser(user);
 
-        // 2. Vincular los repostajes al objeto Job
-        if (job.getRefuels() != null) {
-            job.getRefuels().forEach(refuel -> refuel.setJob(job));
-        }
+        // 1. Calcular el coste del combustible basado en los litros del DTO
+        // Asumiendo que añadiste totalFuelLiters a tu JobRequest
+        double fuelCost = job.getTotalFuelLiters() * fuelPrice;
 
-        // 3. Calcular Gastos Totales
-        double fuelExpenses = calculateFuelExpenses(job.getRefuels());
-        double otherExpenses = calculateOtherExpenses(job.getEvents());
+        // 2. Calcular multas y otros eventos
+        double penaltyExpenses = calculatePenaltyExpenses(job.getEvents());
 
-        // 4. Calcular Beneficio Neto (Net Income)
-        // Guardamos el bruto original en una variable por si quieres mostrarlo
-        long grossIncome = job.getIncome(); 
-        long netIncome = Math.round(grossIncome - fuelExpenses - otherExpenses);
-        
-        // Actualizamos el income para que la DB refleje el dinero REAL ganado
+        // 3. Beneficio Neto Final
+        // Ingreso Bruto - Gastos de Combustible - Multas
+        long netIncome = Math.round(job.getIncome() - fuelCost - penaltyExpenses);
+
         job.setIncome(netIncome);
+        job.setFuelCost(fuelCost);
 
-        // 5. Guardar todo en cascada
+        if (job.getEvents() != null) {
+            job.getEvents().forEach(event -> {
+                event.setJob(job);
+            });
+        }
+
+        job.setCreatedAt(new Date());
+        job.setCargoDamagePerc(Float.parseFloat(String.valueOf(Math.round(job.getCargoDamagePerc() * 100))));
+
         return jobRepository.save(job);
     }
 
-    /**
-     * Suma todos los costes de los repostajes realizados durante el viaje.
-     */
-    private double calculateFuelExpenses(List<RefuelEntity> refuels) {
-        if (refuels == null) return 0.0;
-        return refuels.stream()
-                .mapToDouble(RefuelEntity::getTotalCost)
-                .sum();
+    public void deleteJob(Long id) {
+        jobRepository.deleteById(id);
     }
 
-    /**
-     * Suma el coste de multas y otros eventos negativos.
-     */
-    private double calculateOtherExpenses(List<JobEventEntity> events) {
-        if (events == null) return 0.0;
+    private double calculatePenaltyExpenses(List<JobEventEntity> events) {
+        if (events == null)
+            return 0.0;
         return events.stream()
-                .filter(e -> "FINE".equalsIgnoreCase(e.getType().name()) || "TOLL".equalsIgnoreCase(e.getType().name()))
-                .mapToDouble(JobEventEntity::getAmount)
+                .filter(e -> e.getType() == JobEventTypeEnum.SPEEDING || e.getType() == JobEventTypeEnum.CRASH)
+                .mapToDouble(e -> e.getAmount() != null ? e.getAmount() : 0.0)
                 .sum();
     }
 }
