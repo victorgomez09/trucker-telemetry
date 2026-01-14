@@ -1,6 +1,7 @@
 import { CommonModule, CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { JobService } from '../../services/job';
+import { AuthService } from '../../services/auth';
 
 @Component({
   selector: 'app-dashboard',
@@ -9,23 +10,15 @@ import { JobService } from '../../services/job';
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
-private jobService = inject(JobService);
+  public auth = inject(AuthService);
+  private jobService = inject(JobService);
 
-  // Cargamos los trabajos (puedes inicializarlo desde el servicio)
-  jobs = this.jobService.jobsSignal;
-
-  // CÁLCULOS AUTOMÁTICOS CON SIGNALS
-  totalJobs = computed(() => this.jobs().length);
-  
-  totalDistance = computed(() => 
-    this.jobs().reduce((acc, job) => acc + job.distance, 0)
-  );
-
-  totalIncome = computed(() => 
-    this.jobs().reduce((acc, job) => acc + job.income, 0)
-  );
+  dashboardData = this.jobService.$dashboard;
+  isLoading = signal(true);
 
   ngOnInit() {
-    this.jobService.loadJobs();
+    this.jobService.loadUserDashboard();
+
+    this.isLoading.set(false);
   }
 }

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.9.xsd">
+
+    <changeSet id="20240523-1" author="viti">
+        <createTable tableName="companies">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="tag" type="VARCHAR(10)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="20240523-2" author="viti">
+        <createTable tableName="user_companies">
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="company_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="user_companies" baseColumnNames="user_id" 
+                                 constraintName="fk_user_comp_user" referencedTableName="users" 
+                                 referencedColumnNames="id"/>
+                                 
+        <addForeignKeyConstraint baseTableName="user_companies" baseColumnNames="company_id" 
+                                 constraintName="fk_user_comp_comp" referencedTableName="companies" 
+                                 referencedColumnNames="id"/>
+
+        <addUniqueConstraint tableName="user_companies" columnNames="user_id, company_id" 
+                             constraintName="uq_user_company"/>
+    </changeSet>
+
+    <changeSet id="20240523-3" author="viti">
+        <addColumn tableName="jobs">
+            <column name="company_id" type="BIGINT"/>
+        </addColumn>
+
+        <addForeignKeyConstraint baseTableName="jobs" baseColumnNames="company_id" 
+                                 constraintName="fk_job_company" referencedTableName="companies" 
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+</databaseChangeLog>

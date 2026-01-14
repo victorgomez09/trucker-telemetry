@@ -61,4 +61,8 @@ public class JobEntity {
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private UserEntity user;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "company_id")
+    private CompanyEntity company;
 }

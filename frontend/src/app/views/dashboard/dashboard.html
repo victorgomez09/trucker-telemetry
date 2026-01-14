@@ -1,116 +1,113 @@
-<div class="p-6 space-y-8 bg-base-300 min-h-screen">
-  
-  <header class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-    <div>
-      <h1 class="text-3xl font-black italic uppercase tracking-tighter">Panel de <span class="text-primary">Control</span></h1>
-      <p class="text-sm opacity-60">Bienvenido de nuevo, Comandante de la ruta.</p>
+<div class="p-6 bg-base-200 min-h-screen">
+  @if (isLoading()) {
+    <div class="flex justify-center items-center h-64">
+      <span class="loading loading-dots loading-lg text-primary"></span>
     </div>
-    <div class="stats shadow bg-base-100 border border-white/5">
-      <div class="stat py-2 px-4">
-        <div class="stat-title text-[10px] font-bold uppercase">Estado del Servidor</div>
-        <div class="stat-value text-success text-sm flex items-center gap-2">
-          <span class="relative flex h-2 w-2">
-            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-            <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
-          </span>
-          Sincronizado
+  } @else {
+    <div class="flex justify-between items-center mb-8">
+      <div>
+        <h1 class="text-3xl font-black uppercase italic tracking-tighter">Panel de Conductor</h1>
+        <p class="text-base-content/60">Bienvenido, {{ auth.getUser()?.username }}</p>
+      </div>
+      <div class="badge badge-success gap-2 p-4">
+        <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
+        Sistema Online
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+      <div class="stats shadow bg-base-100 border-l-4 border-primary">
+        <div class="stat">
+          <div class="stat-title text-xs uppercase font-bold">Kilómetros Totales</div>
+          <div class="stat-value text-primary">{{ dashboardData().stats.totalKm | number:'1.0-0' }}</div>
+          <div class="stat-desc font-mono">KM Acumulados</div>
+        </div>
+      </div>
+
+      <div class="stats shadow bg-base-100 border-l-4 border-secondary">
+        <div class="stat">
+          <div class="stat-title text-xs uppercase font-bold">Entregas</div>
+          <div class="stat-value text-secondary">{{ dashboardData().stats.totalJobs }}</div>
+          <div class="stat-desc font-mono">Viajes finalizados</div>
+        </div>
+      </div>
+
+      <div class="stats shadow bg-base-100 border-l-4 border-success">
+        <div class="stat">
+          <div class="stat-title text-xs uppercase font-bold">Beneficio Neto</div>
+          <div class="stat-value text-success">{{ dashboardData().stats.totalIncome | number:'1.0-2' }}€</div>
+          <div class="stat-desc font-mono">Libre de gastos</div>
+        </div>
+      </div>
+
+      <div class="stats shadow bg-base-100 border-l-4 border-warning">
+        <div class="stat">
+          <div class="stat-title text-xs uppercase font-bold">Consumo Medio</div>
+          <div class="stat-value text-warning">{{ dashboardData().stats.avgConsumption | number:'1.1-1' }}</div>
+          <div class="stat-desc font-mono">L / 100 KM</div>
         </div>
       </div>
     </div>
-  </header>
 
-  <section>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="card bg-base-100 shadow-xl border border-base-300">
+      <div class="p-5 border-b border-base-300 flex justify-between items-center">
+        <h2 class="font-bold text-lg flex items-center gap-2">
+          <i class="fas fa-history text-primary"></i> Historial Global de Trabajos
+        </h2>
+        <button class="btn btn-ghost btn-xs">Ver todo</button>
+      </div>
       
-      <div class="stat bg-base-100 rounded-box shadow border border-white/5">
-        <div class="stat-figure text-primary">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-        </div>
-        <div class="stat-title font-bold text-xs">TOTAL ENTREGAS</div>
-        <div class="stat-value text-2xl">{{ totalJobs() }}</div>
-        <div class="stat-desc">Finalizadas con éxito</div>
-      </div>
-      
-      <div class="stat bg-base-100 rounded-box shadow border border-white/5">
-        <div class="stat-figure text-secondary">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
-        </div>
-        <div class="stat-title font-bold text-xs">KM RECORRIDOS</div>
-        <div class="stat-value text-2xl text-secondary">{{ totalDistance() | number:'1.0-0' }}</div>
-        <div class="stat-desc">En todas las rutas</div>
-      </div>
-
-      <div class="stat bg-base-100 rounded-box shadow border border-white/5">
-        <div class="stat-figure text-success">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-8 h-8 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M12 16V15m0 1v-8"></path></svg>
-        </div>
-        <div class="stat-title font-bold text-xs">INGRESOS TOTALES</div>
-        <div class="stat-value text-2xl text-success">{{ totalIncome() | currency:'EUR':'symbol':'1.0-0' }}</div>
-        <div class="stat-desc text-success">↗︎ 400 (14%)</div>
-      </div>
-
-      <div class="stat bg-base-100 rounded-box shadow border border-white/5">
-        <div class="stat-title font-bold text-xs">EFICIENCIA</div>
-        <div class="stat-value text-2xl">98%</div>
-        <div class="stat-actions">
-          <progress class="progress progress-primary w-full" value="98" max="100"></progress>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
-  <section class="card bg-base-100 shadow border border-white/5 overflow-hidden">
-    <div class="p-6 border-b border-white/5 flex justify-between items-center bg-base-200/50">
-      <h3 class="font-bold uppercase tracking-widest text-sm">Historial de Entregas</h3>
-      <button class="btn btn-sm btn-ghost">Exportar CSV</button>
-    </div>
-    
-    <div class="overflow-x-auto">
-      <table class="table table-zebra w-full">
-        <thead class="bg-base-200">
-          <tr class="text-xs uppercase opacity-70">
-            <th>Carga</th>
-            <th>Origen / Destino</th>
-            <th>Camión</th>
-            <th>Distancia</th>
-            <th>Ganancia</th>
-            <th>Fecha</th>
-          </tr>
-        </thead>
-        <tbody>
-          @for (job of jobs(); track job.id) {
-            <tr class="hover:bg-primary/5 transition-colors">
-              <td>
-                <div class="flex items-center gap-3">
-                  <div class="avatar placeholder">
-                    <div class="bg-neutral text-neutral-content rounded-lg w-8">
-                      <span class="text-xs">{{ job.cargoName.substring(0,2) }}</span>
-                    </div>
-                  </div>
-                  <div class="font-bold text-sm">{{ job.cargoName }}</div>
-                </div>
-              </td>
-              <td>
-                <div class="text-xs">
-                  <span class="badge badge-outline badge-xs">{{ job.sourceCity }}</span>
-                  <span class="mx-1">→</span>
-                  <span class="badge badge-primary badge-xs">{{ job.destinationCity }}</span>
-                </div>
-              </td>
-              <td class="text-xs opacity-70">{{ job.truckName }}</td>
-              <td class="font-mono text-xs">{{ job.distance }} km</td>
-              <td class="text-success font-bold text-xs">{{ job.income | currency:'EUR' }}</td>
-              <td class="text-xs opacity-50">{{ job.date | date:'shortDate' }}</td>
-            </tr>
-          } @empty {
+      <div class="overflow-x-auto">
+        <table class="table table-zebra w-full">
+          <thead class="bg-base-200/50">
             <tr>
-              <td colspan="6" class="text-center py-10 opacity-30 italic">No hay trabajos registrados todavía</td>
+              <th>Fecha</th>
+              <th>Origen / Destino</th>
+              <th>Carga</th>
+              <th>Empresa</th>
+              <th class="text-right">Ganancia</th>
             </tr>
-          }
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            @for (job of dashboardData().jobs; track job.id) {
+              <tr class="hover">
+                <td class="text-xs">{{ job.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <div class="flex items-center gap-2 font-medium">
+                    <span class="text-primary">{{ job.sourceCity }}</span>
+                    <i class="fas fa-arrow-right text-[10px] opacity-30"></i>
+                    <span class="text-secondary">{{ job.destinationCity }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="flex flex-col">
+                    <span class="text-xs font-bold">{{ job.cargoName }}</span>
+                    <span class="text-[10px] opacity-50">{{ job.cargoMassKg / 1000 }} Toneladas</span>
+                  </div>
+                </td>
+                <td>
+                  @if (job.company) {
+                    <span class="badge badge-sm badge-outline badge-primary font-bold">
+                      [{{ job.company.tag }}] {{ job.company.name }}
+                    </span>
+                  } @else {
+                    <span class="badge badge-sm badge-ghost opacity-50 italic">Autónomo</span>
+                  }
+                </td>
+                <td class="text-right font-mono font-bold text-success">
+                  +{{ job.income | number:'1.0-2' }}€
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="5" class="text-center py-10 opacity-50 italic">
+                  No has registrado ningún trabajo todavía. ¡Arranca el motor!
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
     </div>
-  </section>
-
+  }
 </div>

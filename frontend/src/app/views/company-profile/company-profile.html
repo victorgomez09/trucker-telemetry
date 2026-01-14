@@ -1,0 +1,167 @@
+<div class="p-6 bg-base-200 min-h-screen">
+  <div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">Perfil de la empresa #218832</h1>
+    <div class="flex gap-2">
+      <button class="btn btn-primary btn-sm"><i class="fas fa-plus"></i> Seguir</button>
+      <button class="btn btn-square btn-sm"><i class="fas fa-ellipsis-h"></i></button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    
+    <div class="space-y-6">
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="card-body items-center text-center">
+          <div class="avatar placeholder mb-4">
+            <div class="bg-info text-info-content rounded-full w-24">
+              <span class="text-3xl">🚚</span>
+            </div>
+          </div>
+          <h2 class="card-title">🇪🇸 {{ summary()?.companyName }}</h2>
+          <p class="text-sm text-base-content/60">Seguidores: 0</p>
+          <div class="divider"></div>
+          <p class="text-xs self-start italic">🗓️ 05.1.2026</p>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="p-3 bg-base-200 font-bold text-xs uppercase tracking-widest">Administración</div>
+        <div class="p-4 flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="badge badge-ghost p-1">🇪🇸</span>
+            <span class="text-primary font-bold">Viti</span>
+          </div>
+          <span class="text-xs opacity-70">Dueño</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="p-3 bg-base-200 font-bold text-xs uppercase tracking-widest">Reglamento</div>
+        <div class="p-4 space-y-3 text-sm">
+          <div class="flex items-center gap-3"><i class="fas fa-globe"></i> Sin límite</div>
+          <div class="flex items-center gap-3"><i class="fas fa-truck"></i> Sin límite</div>
+          <div class="flex items-center gap-3"><i class="fas fa-tachometer-alt"></i> Sin límite</div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="p-3 bg-base-200 font-bold text-xs uppercase tracking-widest">
+          Lista de empleados [{{ summary()?.recentJobs?.length || 1 }}]
+        </div>
+        <div class="overflow-x-auto">
+          <table class="table table-sm w-full">
+            <thead>
+              <tr class="bg-base-200/50">
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Puesto</th>
+                <th>Actividad</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>1</td>
+                <td class="text-primary font-bold">🇪🇸 Viti</td>
+                <td>Dueño</td>
+                <td><span class="badge badge-success badge-sm text-white">Bitácoras</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-6">
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="flex justify-between items-center p-3 bg-base-200">
+          <span class="font-bold text-xs uppercase">Estadísticas</span>
+          <div class="join">
+            <button class="join-item btn btn-xs btn-primary">Mensuales</button>
+            <button class="join-item btn btn-xs">Totales</button>
+          </div>
+        </div>
+        
+        <div class="p-4 space-y-4">
+          <div class="flex justify-between items-center">
+            <div class="flex items-center gap-2 font-bold"><span class="text-lg">🚛</span> ETS2</div>
+            <div class="join border border-base-300">
+              <button class="join-item btn btn-xs btn-primary">Todos</button>
+              <button class="join-item btn btn-xs">Real</button>
+              <button class="join-item btn btn-xs">Carrera</button>
+            </div>
+          </div>
+          <div class="flex justify-between text-sm border-b pb-1">
+            <span class="opacity-70">↔️ Distancia</span>
+            <span class="font-mono">{{ summary()?.totalKilometers }} km 📈</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span class="opacity-70">📦 Entregas</span>
+            <span class="font-mono">{{ summary()?.totalJobs }} 📈</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="card bg-base-100 shadow-sm border border-base-300">
+        <div class="flex justify-between items-center p-3 bg-base-200">
+          <span class="font-bold text-xs uppercase text-primary">Premios</span>
+          <span class="badge badge-info badge-sm text-white">0</span>
+        </div>
+        <div class="p-10 text-center text-sm opacity-50 bg-info/10 m-4 rounded-lg">
+          No se han encontrado premios.
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="card bg-base-100 shadow-sm border border-base-300 col-span-1 md:col-span-2">
+  <div class="flex justify-between items-center p-3 bg-base-200">
+    <span class="font-bold text-xs uppercase tracking-widest">Historial de Entregas Recientes</span>
+    <span class="badge badge-primary badge-outline">{{ summary()?.recentJobs?.length || 0 }} registradas</span>
+  </div>
+  <div class="overflow-x-auto">
+    <table class="table table-zebra table-sm w-full">
+      <thead>
+        <tr class="bg-base-200/30">
+          <th>Fecha</th>
+          <th>Ruta</th>
+          <th>Carga</th>
+          <th>Peso</th>
+          <th class="text-right">Acción</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (job of summary()?.recentJobs; track job.createdAt) {
+          <tr class="hover">
+            <td class="text-xs opacity-70">
+              {{ job.createdAt | date:'dd/MM/yyyy HH:mm' }}
+            </td>
+            <td>
+              <div class="flex items-center gap-2">
+                <span class="font-semibold">{{ job.sourceCity }}</span>
+                <i class="fas fa-arrow-right text-[10px] opacity-50"></i>
+                <span class="font-semibold">{{ job.destinationCity }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge badge-ghost badge-sm">{{ job.cargoName }}</span>
+            </td>
+            <td>
+              <span class="font-mono text-xs">{{ (job.cargoMass / 1000).toFixed(1) }} t</span>
+            </td>
+            <td class="text-right">
+              <button class="btn btn-ghost btn-xs text-primary">Detalles</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="5" class="text-center p-10 opacity-50">No hay entregas registradas recientemente.</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>

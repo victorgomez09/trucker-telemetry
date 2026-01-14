@@ -13,8 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.trucker.api.dto.DashboardResponse;
 import com.trucker.api.dto.JobRequest;
 import com.trucker.api.dto.JobResponse;
+import com.trucker.api.dto.UserStatsResponse;
 import com.trucker.api.mapper.JobMapper;
 import com.trucker.api.service.JobService;
 
@@ -31,39 +33,36 @@ public class JobController {
     @GetMapping("/my-jobs")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<List<JobResponse>> getMyJobs(Principal principal) {
-        return ResponseEntity.ok(jobService.getJobsForCurrentUser(principal.getName()).stream().map(jobMapper::toDto).toList());
+        return ResponseEntity
+                .ok(jobService.getJobsForCurrentUser(principal.getName()).stream().map(jobMapper::toDto).toList());
     }
 
     // @GetMapping("/{id}")
     // @PreAuthorize("hasRole('USER')")
     // public ResponseEntity<JobResponse> getById(Long id) {
-    //     JobResponse jobDto = jobMapper.toDto(jobService.getJobById(id));
-    //     if (jobDto == null) {
-    //         return ResponseEntity.notFound().build();
-    //     }
-
-    //     return ResponseEntity.ok(jobDto);
+    // JobResponse jobDto = jobMapper.toDto(jobService.getJobById(id));
+    // if (jobDto == null) {
+    // return ResponseEntity.notFound().build();
     // }
 
-    // @GetMapping("/stats/summary")
-    // @PreAuthorize("hasRole('USER')")
-    // public ResponseEntity<?> getGlobalStats() {
-    //     List<JobEntity> allJobs = jobService.getAllJobs();
-
-    //     long totalEarned = allJobs.stream().mapToLong(JobEntity::getIncome).sum();
-    //     int totalDistance = allJobs.stream().mapToInt(JobEntity::getDistanceKm).sum();
-    //     long totalJobs = allJobs.size();
-
-    //     return ResponseEntity.ok(Map.of(
-    //             "totalEarned", totalEarned,
-    //             "totalDistanceKm", totalDistance,
-    //             "totalJobs", totalJobs));
+    // return ResponseEntity.ok(jobDto);
     // }
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<DashboardResponse> getDashboardData(Principal principal) {
+        String username = principal.getName();
+
+        UserStatsResponse stats = jobService.getUserStats(username);
+        List<JobResponse> userJobs = jobService.getJobsForCurrentUser(username).stream().map(jobMapper::toDto).toList();
+
+        return ResponseEntity.ok(new DashboardResponse(stats, userJobs));
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<JobResponse> create(@RequestBody JobRequest jobDto, Principal principal) {
-        return ResponseEntity.ok(jobMapper.toDto(jobService.processAndSaveJob(jobMapper.toEntity(jobDto), principal.getName())));
+        return ResponseEntity
+                .ok(jobMapper.toDto(jobService.processAndSaveJob(jobMapper.toEntity(jobDto), principal.getName())));
     }
 
     @DeleteMapping("/{id}")

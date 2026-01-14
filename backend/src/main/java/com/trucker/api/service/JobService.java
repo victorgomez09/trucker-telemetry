@@ -6,10 +6,13 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.trucker.api.dto.UserStatsResponse;
+import com.trucker.api.entity.CompanyEntity;
 import com.trucker.api.entity.JobEntity;
 import com.trucker.api.entity.JobEventEntity;
 import com.trucker.api.entity.JobEventTypeEnum;
 import com.trucker.api.entity.UserEntity;
+import com.trucker.api.repository.CompanyRepository;
 import com.trucker.api.repository.JobRepository;
 import com.trucker.api.repository.UserRepository;
 
@@ -22,6 +25,7 @@ public class JobService {
 
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
 
     @Value("${trucker.economy.fuel-price-per-liter}")
     private double fuelPrice;
@@ -30,12 +34,20 @@ public class JobService {
         return jobRepository.findByUserUsernameOrderByCreatedAtDesc(username);
     }
 
+    public UserStatsResponse getUserStats(String username) {
+        return jobRepository.getUserStats(username);
+    }
+
     @Transactional
     public JobEntity processAndSaveJob(JobEntity job, String username) {
         System.out.println("job income: " + job.getIncome());
         UserEntity user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         job.setUser(user);
+
+        CompanyEntity company = companyRepository.findById(job.getCompany().getId())
+                .orElseThrow(() -> new RuntimeException("Empresa no válida"));
+        job.setCompany(company);
 
         // 1. Calcular el coste del combustible basado en los litros del DTO
         // Asumiendo que añadiste totalFuelLiters a tu JobRequest
