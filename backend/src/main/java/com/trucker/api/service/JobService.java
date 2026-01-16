@@ -45,9 +45,11 @@ public class JobService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         job.setUser(user);
 
-        CompanyEntity company = companyRepository.findById(job.getCompany().getId())
-                .orElseThrow(() -> new RuntimeException("Empresa no válida"));
-        job.setCompany(company);
+        if (job.getCompany() != null) {
+            CompanyEntity company = companyRepository.findById(job.getCompany().getId())
+                    .orElseThrow(() -> new RuntimeException("Empresa no válida"));
+            job.setCompany(company);
+        }
 
         // 1. Calcular el coste del combustible basado en los litros del DTO
         // Asumiendo que añadiste totalFuelLiters a tu JobRequest

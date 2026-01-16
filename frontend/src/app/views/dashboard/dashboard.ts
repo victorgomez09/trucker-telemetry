@@ -18,6 +18,7 @@ export class Dashboard {
 
   ngOnInit() {
     this.jobService.loadUserDashboard();
+    console.log('data', this.jobService.loadUserDashboard())
 
     this.isLoading.set(false);
   }

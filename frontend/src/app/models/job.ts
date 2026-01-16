@@ -5,23 +5,22 @@ export interface Job {
   id: number;
   
   // Información de Ruta
-  sourceCity: string;
-  destinationCity: string;
-  sourceCompany: string;
-  destinationCompany: string;
+  city_source: string;
+  city_destination: string;
+  source_company: string;
+  destination_company: string;
   
   // Información de Carga
-  cargoName: string;
-  cargoMassKg: number;
+  cargo_name: string;
+  cargo_mass_kg: number;
   
   // Estadísticas del Viaje
-  distanceKm: number;
-  fuelConsumption: number; // Consumo promedio (L/100km)
-  totalFuelLiters: number; // Litros totales usados
+  planned_distance: number;
+  fuel_consumption: number; // Consumo promedio (L/100km)
+  total_fuel_liters: number; // Litros totales usados
   
   // Finanzas (Calculadas en Backend)
-  income: number;          // Beneficio neto
-  jobIncome: number;       // Ingreso bruto del contrato
+  job_income: number;       // Ingreso bruto del contrato
   fuelCost: number;        // Coste del combustible (litros * precio_configurable)
   
   // Relaciones
@@ -29,6 +28,5 @@ export interface Job {
   company?: Company;
   
   // Metadatos
-  createdAt: string | Date;
-  updatedAt?: string | Date;
+  created_at: string | Date;
 }

@@ -6,7 +6,7 @@ import { Job } from '../models/job';
 @Injectable({ providedIn: 'root' })
 export class JobService {
   private http = inject(HttpClient);
-  private readonly API_URL = `http://localhost:8080/api/v1/jobs`;
+  private readonly API_URL = `https://stunning-garbanzo-x9qj59gwg54c9654-8080.app.github.dev/api/v1/jobs`;
 
   private jobsState = signal<Job[]>([]);
   private dashboardSignal = signal<Dashboard>({} as Dashboard)
@@ -26,7 +26,7 @@ export class JobService {
 
   loadUserDashboard() {
     this.http.get<Dashboard>(`${this.API_URL}/dashboard`).subscribe({
-      next: (data) => this.dashboardSignal.set(data),
+      next: (data) => {this.dashboardSignal.set(data); console.log("data from service", data)},
       error: (err) => console.error('Error cargando dashb oard', err)
     })
   }

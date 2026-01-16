@@ -38,11 +38,13 @@ public class JobEntity {
     private String destinationCompany;
     private String cargoName;
     private Long income;
+    @Column(name = "fuel_comsumption")
     private Double fuelComsumption;
     private Double totalFuelLiters;
     private Double fuelCost;
     private Integer distanceKm;
     private Float cargoDamagePerc;
+    private Float cargoMassKg;
 
     @Column(nullable = false)
     private String status = "COMPLETED";

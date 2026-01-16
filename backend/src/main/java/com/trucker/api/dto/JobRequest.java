@@ -16,5 +16,7 @@ public record JobRequest(
     @JsonProperty("fuel_comsumption") Double fuelComsumption,
     @JsonProperty("fuel_cost") Double fuelCost,
     @JsonProperty("job_income") Long jobIncome,
+    @JsonProperty("total_fuel_liters") Double totalFuelLiters,
+    @JsonProperty("cargo_mass_kg") Double cargoMassKg,
     List<JobEventRequest> events
 ) {}

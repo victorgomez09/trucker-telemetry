@@ -2,14 +2,19 @@ package com.trucker.api.controller;
 
 import java.security.Principal;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.trucker.api.dto.CompanyRequest;
 import com.trucker.api.dto.CompanySummaryResponse;
+import com.trucker.api.entity.CompanyEntity;
+import com.trucker.api.mapper.CompanyMapper;
 import com.trucker.api.service.CompanyService;
 
 import lombok.RequiredArgsConstructor;
@@ -19,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CompanyController {
 
+    private final CompanyMapper companyMapper;
     private final CompanyService companyService;
 
     @GetMapping("/{id}/summary")
@@ -32,6 +38,15 @@ public class CompanyController {
             @PathVariable String username) {
         boolean isMember = companyService.isUserInCompany(id, username);
         return ResponseEntity.ok(isMember);
+    }
+
+    @PostMapping
+    public ResponseEntity<CompanyEntity> create(
+            @RequestBody CompanyRequest request, 
+            Principal principal
+    ) {
+        CompanyEntity newCompany = companyService.createCompany(companyMapper.toEntity(request), principal.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(newCompany);
     }
 
     @PostMapping("/{id}/join")

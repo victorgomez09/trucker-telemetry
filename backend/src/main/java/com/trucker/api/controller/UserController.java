@@ -29,7 +29,7 @@ public class UserController {
         if (principal == null) {
             return ResponseEntity.status(401).build();
         }
-
+        
         UserEntity user = userService.findByUsername(principal.getName());
 
         return ResponseEntity.ok(userMapper.toDto(user));

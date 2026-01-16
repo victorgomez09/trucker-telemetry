@@ -52,4 +52,10 @@
                                  referencedColumnNames="id"/>
     </changeSet>
 
+    <changeSet id="20240523-4" author="viti">
+        <addColumn tableName="jobs">
+            <column name="cargo_mass_kg" type="FLOAT"/>
+        </addColumn>
+    </changeSet>
+
 </databaseChangeLog>

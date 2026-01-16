@@ -15,9 +15,9 @@ public interface JobRepository extends JpaRepository<JobEntity, Long> {
     @Query("""
                 SELECT new com.trucker.api.dto.UserStatsResponse(
                     COUNT(j),
-                    SUM(j.distanceKm),
-                    SUM(j.income),
-                    AVG(j.fuelConsumption)
+                    SUM(CAST(j.distanceKm as double)),
+                    SUM(CAST(j.income as double)),
+                    AVG(CAST(j.fuelComsumption as double))
                 )
                 FROM JobEntity j
                 WHERE j.user.username = :username

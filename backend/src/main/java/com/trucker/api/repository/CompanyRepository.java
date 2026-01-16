@@ -28,4 +28,6 @@ public interface CompanyRepository extends JpaRepository<CompanyEntity, Long> {
     List<CompanyJobProjection> findAllJobsByCompanyId(Long companyId);
 
     boolean existsByIdAndMembersUsername(Long companyId, String username);
+
+    Boolean existsByName(String name);
 }

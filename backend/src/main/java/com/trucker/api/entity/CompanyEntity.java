@@ -26,7 +26,7 @@ public class CompanyEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private String tag; // Ej: [ESP]
+    private String tag;
     private LocalDateTime createdAt;
 
     @ManyToMany(mappedBy = "companies")

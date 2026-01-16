@@ -6,8 +6,8 @@ export interface Dashboard {
 }
 
 interface UserStatsResponse {
-    totalJobs: number,
-    totalKm: number,
-    totalIncome: number,
-    avgConsumption: number
+    total_jobs: number,
+    total_km: number,
+    total_income: number,
+    avg_consumption: number
 }

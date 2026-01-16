@@ -1,5 +1,7 @@
 package com.trucker.api.service;
 
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -43,6 +45,31 @@ public class CompanyService {
     @Transactional(readOnly = true)
     public boolean isUserInCompany(Long companyId, String username) {
         return companyRepository.existsByIdAndMembersUsername(companyId, username);
+    }
+
+    @Transactional
+    public CompanyEntity createCompany(CompanyEntity company, String username) {
+        // 1. Verificar si el nombre ya existe
+        if (companyRepository.existsByName(company.getName())) {
+            throw new RuntimeException("El nombre de la empresa ya está en uso");
+        }
+
+        // 2. Crear la entidad
+        company.setCreatedAt(LocalDateTime.now());
+        company.setMembers(Collections.emptyList());
+
+        // 3. Buscar al usuario creador y añadirlo como primer miembro
+        UserEntity creator = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        
+        // Guardamos la empresa primero
+        CompanyEntity savedCompany = companyRepository.save(company);
+        
+        // Establecemos la relación bi-direccional
+        creator.getCompanies().add(savedCompany);
+        userRepository.save(creator);
+
+        return savedCompany;
     }
 
     @Transactional

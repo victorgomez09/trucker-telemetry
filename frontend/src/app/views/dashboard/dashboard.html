@@ -4,22 +4,11 @@
       <span class="loading loading-dots loading-lg text-primary"></span>
     </div>
   } @else {
-    <div class="flex justify-between items-center mb-8">
-      <div>
-        <h1 class="text-3xl font-black uppercase italic tracking-tighter">Panel de Conductor</h1>
-        <p class="text-base-content/60">Bienvenido, {{ auth.getUser()?.username }}</p>
-      </div>
-      <div class="badge badge-success gap-2 p-4">
-        <div class="w-2 h-2 rounded-full bg-white animate-pulse"></div>
-        Sistema Online
-      </div>
-    </div>
-
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
       <div class="stats shadow bg-base-100 border-l-4 border-primary">
         <div class="stat">
           <div class="stat-title text-xs uppercase font-bold">Kilómetros Totales</div>
-          <div class="stat-value text-primary">{{ dashboardData().stats.totalKm | number:'1.0-0' }}</div>
+          <div class="stat-value text-primary">{{ dashboardData().stats.total_km | number:'1.0-0' }}</div>
           <div class="stat-desc font-mono">KM Acumulados</div>
         </div>
       </div>
@@ -27,7 +16,7 @@
       <div class="stats shadow bg-base-100 border-l-4 border-secondary">
         <div class="stat">
           <div class="stat-title text-xs uppercase font-bold">Entregas</div>
-          <div class="stat-value text-secondary">{{ dashboardData().stats.totalJobs }}</div>
+          <div class="stat-value text-secondary">{{ dashboardData().stats.total_jobs }}</div>
           <div class="stat-desc font-mono">Viajes finalizados</div>
         </div>
       </div>
@@ -35,7 +24,7 @@
       <div class="stats shadow bg-base-100 border-l-4 border-success">
         <div class="stat">
           <div class="stat-title text-xs uppercase font-bold">Beneficio Neto</div>
-          <div class="stat-value text-success">{{ dashboardData().stats.totalIncome | number:'1.0-2' }}€</div>
+          <div class="stat-value text-success">{{ dashboardData().stats.total_income | number:'1.0-2' }}€</div>
           <div class="stat-desc font-mono">Libre de gastos</div>
         </div>
       </div>
@@ -43,7 +32,7 @@
       <div class="stats shadow bg-base-100 border-l-4 border-warning">
         <div class="stat">
           <div class="stat-title text-xs uppercase font-bold">Consumo Medio</div>
-          <div class="stat-value text-warning">{{ dashboardData().stats.avgConsumption | number:'1.1-1' }}</div>
+          <div class="stat-value text-warning">{{ dashboardData().stats.avg_consumption| number:'1.1-1' }}</div>
           <div class="stat-desc font-mono">L / 100 KM</div>
         </div>
       </div>
@@ -71,18 +60,18 @@
           <tbody>
             @for (job of dashboardData().jobs; track job.id) {
               <tr class="hover">
-                <td class="text-xs">{{ job.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="text-xs">{{ job.created_at | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td>
                   <div class="flex items-center gap-2 font-medium">
-                    <span class="text-primary">{{ job.sourceCity }}</span>
+                    <span class="text-primary">{{ job.city_source }}</span>
                     <i class="fas fa-arrow-right text-[10px] opacity-30"></i>
-                    <span class="text-secondary">{{ job.destinationCity }}</span>
+                    <span class="text-secondary">{{ job.city_destination }}</span>
                   </div>
                 </td>
                 <td>
                   <div class="flex flex-col">
-                    <span class="text-xs font-bold">{{ job.cargoName }}</span>
-                    <span class="text-[10px] opacity-50">{{ job.cargoMassKg / 1000 }} Toneladas</span>
+                    <span class="text-xs font-bold">{{ job.cargo_name }}</span>
+                    <span class="text-[10px] opacity-50">{{ job.cargo_mass_kg / 1000 }} Toneladas</span>
                   </div>
                 </td>
                 <td>
@@ -95,7 +84,7 @@
                   }
                 </td>
                 <td class="text-right font-mono font-bold text-success">
-                  +{{ job.income | number:'1.0-2' }}€
+                  +{{ job.job_income | number:'1.0-2' }}€
                 </td>
               </tr>
             } @empty {
