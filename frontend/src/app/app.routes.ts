@@ -4,20 +4,24 @@ import { authGuard } from './guards/auth';
 export const routes: Routes = [
   {
     path: 'login',
-    loadComponent: () => import('./views/login/login').then(m => m.Login)
+    loadComponent: () => import('./views/login/login').then((m) => m.Login),
   },
   {
     path: 'register',
-    loadComponent: () => import('./views/register/register').then(m => m.Register)
+    loadComponent: () => import('./views/register/register').then((m) => m.Register),
   },
   {
     path: '',
-    loadComponent: () => import('./components/main-layout/main-layout').then(m => m.MainLayout),
+    loadComponent: () => import('./components/main-layout/main-layout').then((m) => m.MainLayout),
     canActivate: [authGuard],
     children: [
       {
         path: '',
         loadComponent: () => import('./views/dashboard/dashboard').then((m) => m.Dashboard),
+      },
+      {
+        path: 'jobs',
+        loadComponent: () => import('./views/jobs/jobs').then((m) => m.Jobs),
       },
       {
         path: 'jobs/:id',
@@ -28,6 +32,6 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./views/company-profile/company-profile').then((m) => m.CompanyProfileComponent),
       },
-    ]
-  }
+    ],
+  },
 ];

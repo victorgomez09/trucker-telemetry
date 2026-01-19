@@ -8,9 +8,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" /></svg>
       </label>
       <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-1 p-2 shadow bg-base-200 rounded-box w-52 border border-white/5">
-        <li><a routerLink="/dashboard" routerLinkActive="active">Panel</a></li>
-        <li><a routerLink="/rutas" routerLinkActive="active">Historial</a></li>
-        <li><a routerLink="/radio" routerLinkActive="active">Radio</a></li>
+        <li><a routerLink="/" routerLinkActive="active">Panel</a></li>
+        <li><a routerLink="/jobs" routerLinkActive="active">Historial</a></li>
       </ul>
     </div>
     <a routerLink="/" class="btn btn-ghost text-2xl font-black italic tracking-tighter gap-0">
@@ -20,9 +19,8 @@
 
   <div class="navbar-center hidden lg:flex">
     <ul class="menu menu-horizontal px-1 gap-2 font-bold uppercase text-xs">
-      <li><a routerLink="/dashboard" routerLinkActive="text-primary">Dashboard</a></li>
-      <li><a routerLink="/fleet" routerLinkActive="text-primary">Mi Flota</a></li>
-      <li><a routerLink="/stats" routerLinkActive="text-primary">Estadísticas</a></li>
+      <li><a routerLink="/" [routerLinkActiveOptions]="{exact: true}" routerLinkActive="text-primary">Dashboard</a></li>
+      <li><a routerLink="/jobs" [routerLinkActiveOptions]="{exact: true}" routerLinkActive="text-primary">Historial</a></li>
     </ul>
   </div>
 

@@ -1,7 +1,7 @@
 <div class="max-w-4xl mx-auto space-y-6">
   <div class="flex justify-between items-center">
-    <button routerLink="/dashboard" class="btn btn-ghost btn-sm gap-2">
-      <i class="fas fa-arrow-left"></i> Volver al Dashboard
+    <button routerLink="/" class="btn btn-ghost btn-sm gap-2">
+      <i class="fas fa-arrow-left"></i> Volver
     </button>
     <div class="badge badge-outline gap-2">ID Registro: #{{ job().id }}</div>
   </div>
@@ -9,7 +9,6 @@
   @if (isLoading()) {
   <div class="flex justify-center p-20"><span class="loading loading-ring loading-lg"></span></div>
   } @else if (job()) {
-  {{job() | json}}
   <div class="card bg-base-100 shadow-xl overflow-hidden">
     <div class="bg-primary p-1"></div>
     <div class="card-body">
@@ -21,7 +20,7 @@
         </div>
 
         <div class="flex flex-col items-center flex-1">
-          <span class="badge badge-primary font-mono mb-2">{{ job().planned_distance }} KM</span>
+          <span class="badge badge-primary  mb-2">{{ job().planned_distance }} KM</span>
           <div class="w-full flex items-center gap-2">
             <div class="h-0.5 bg-base-300 flex-1"></div>
             <i class="fas fa-truck-moving text-primary animate-pulse"></i>
@@ -48,7 +47,7 @@
           </div>
           <div>
             <p class="font-bold text-lg">{{ job().truck_name }}</p>
-            <p class="text-sm">Kms</p>
+            <p class="text-sm">{{job().truck_km}} Kms</p>
           </div>
         </div>
 
@@ -65,11 +64,15 @@
         <div class="space-y-2">
           <div class="flex justify-between text-sm">
             <span>Consumo:</span>
-            <span class="font-mono">{{ job().fuel_consumption }} L/100km</span>
+            <span class="">{{ job().fuel_comsumption }} L/100km</span>
           </div>
           <div class="flex justify-between text-sm">
             <span>Combustible:</span>
-            <span class="font-mono text-warning">{{ job().total_fuel_liters }} L</span>
+            <span class=" text-warning">{{ job().total_fuel_liters }} L</span>
+          </div>
+          <div class="flex justify-between text-sm">
+            <span>Daño:</span>
+            <span class=" text-error">{{ job().cargo_damage }} %</span>
           </div>
         </div>
       </div>
@@ -83,16 +86,23 @@
           <div class="flex justify-between items-center">
             <span class="flex items-center gap-2"><i class="fas fa-plus-circle text-success"></i> Pago del
               Contrato</span>
-            <span class="text-xl font-mono">+{{ job().job_income| number:'1.2-2' }}€</span>
+            <span class="text-xl font-semibold">+{{ job().job_income| number:'1.2-2' }}€</span>
           </div>
 
-          @for (event of job().events; track $index) {
-          <div class="flex justify-between items-center">
-            <span class="flex items-center gap-2"><i class="fas fa-plus-circle text-success"></i> Pago del
-              Contrato</span>
-            <span class="text-xl font-mono">+{{ event.value| number:'1.2-2' }}€</span>
-          </div>
-          }
+
+          <ul class="list bg-base-100 rounded-box shadow-md">
+            <li class="p-4 pb-2 text-xs opacity-60 tracking-wide">Eventos</li>
+            @for (event of job().events; track $index) {
+            <li class="list-row flex items-center justify-between w-full">
+              <div>
+                <div>{{generateEventDescription(event.description)}}</div>
+              </div>
+              <span class="font-semibold">
+                -{{ event.value | number:'1.2-2' }}€
+              </span>
+            </li>
+            }
+          </ul>
 
           <div class="flex justify-between items-center pt-2">
             <span class="text-lg font-bold">Beneficio Neto</span>

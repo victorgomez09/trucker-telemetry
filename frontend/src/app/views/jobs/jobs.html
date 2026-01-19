@@ -1,0 +1,88 @@
+<div class="space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                        <h1 class="text-2xl font-black italic uppercase tracking-tighter">Historial de <span
+                                        class="text-primary">Rutas</span></h1>
+                        <p class="text-xs opacity-50">Gestiona y revisa tus entregas anteriores</p>
+                </div>
+
+                <div class="join w-full md:w-auto">
+                        <input class="input input-bordered join-item w-full md:w-64"
+                                placeholder="Buscar ciudad o carga..." [(ngModel)]="searchTerm"
+                                (ngModelChange)="searchTerm.set($event)" />
+                        <button class="btn join-item btn-primary">
+                                <i class="fas fa-search"></i>
+                        </button>
+                </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-xl border border-base-300 overflow-hidden">
+                <div class="overflow-x-auto">
+                        <table class="table table-zebra w-full">
+                                <thead class="bg-base-200">
+                                        <tr class="text-xs uppercase opacity-70">
+                                                <th>Fecha</th>
+                                                <th>Ruta (Origen ➔ Destino)</th>
+                                                <th>Carga</th>
+                                                <th>Distancia Real</th>
+                                                <th>Beneficio</th>
+                                                <th></th>
+                                        </tr>
+                                </thead>
+                                <tbody>
+                                        @if (isLoading()) {
+                                        <tr>
+                                                <td colspan="6" class="text-center py-10"><span
+                                                                class="loading loading-dots loading-lg"></span></td>
+                                        </tr>
+                                        }
+
+                                        @for (job of filteredJobs(); track job.id) {
+                                        <tr class="hover">
+                                                <td class="text-xs font-mono">
+                                                        {{ job.created_at | date:'dd/MM/yy' }}<br>
+                                                        <span class="opacity-50">{{ job.created_at | date:'HH:mm'
+                                                                }}</span>
+                                                </td>
+                                                <td>
+                                                        <div class="flex flex-col">
+                                                                <span class="font-bold text-sm">{{ job.city_source
+                                                                        }}</span>
+                                                                <span class="text-[10px] opacity-50">{{
+                                                                        job.city_destination }}</span>
+                                                        </div>
+                                                </td>
+                                                <td>
+                                                        <div class="badge badge-outline badge-sm">{{ job.cargo_name }}
+                                                        </div>
+                                                </td>
+                                                <td>
+                                                        <div class="flex items-center gap-2">
+                                                                <span class="font-mono">{{ job.planned_distance |
+                                                                        number:'1.1-1' }}</span>
+                                                                <span class="text-[10px] opacity-40">km</span>
+                                                        </div>
+                                                </td>
+                                                <td class="font-bold text-success">
+                                                        +{{ job.job_income | number:'1.2-2' }}€
+                                                </td>
+                                                <th class="text-right">
+                                                        <button [routerLink]="['/jobs', job.id]"
+                                                                class="btn btn-ghost btn-xs btn-square">
+                                                                <i class="fas fa-eye"></i>
+                                                        </button>
+                                                </th>
+                                        </tr>
+                                        } @empty {
+                                        @if (!isLoading()) {
+                                        <tr>
+                                                <td colspan="6" class="text-center py-10 opacity-50">No se han
+                                                        encontrado registros.</td>
+                                        </tr>
+                                        }
+                                        }
+                                </tbody>
+                        </table>
+                </div>
+        </div>
+</div>

@@ -16,6 +16,7 @@ public record JobResponse(
     Double truckkm,
     Float cargoDamage,
     Double totalFuelLiters,
+    Double fuelComsumption,
     Double cargoMassKg,
     Date createdAt,
     List<JobEventResponse> events

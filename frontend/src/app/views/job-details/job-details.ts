@@ -1,12 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { JobService } from '../../services/job';
 
 @Component({
   selector: 'app-job-details',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './job-details.html',
 })
 export class JobDetails implements OnInit {
@@ -20,6 +20,17 @@ export class JobDetails implements OnInit {
     const id = this.route.snapshot.paramMap.get('id');
     if (id) {
       this.jobService.loadJobById(+id);
+    }
+  }
+
+  generateEventDescription(description: string): string {
+    switch (description) {
+      case "speeding_camera":
+        return "Multa de Velocidad"
+      case "crash":
+        return "Choque"
+      default:
+        return description;
     }
   }
 

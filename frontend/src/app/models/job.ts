@@ -5,6 +5,7 @@ export interface Job {
   id: number;
 
   truck_name: string;
+  truck_km: number;
 
   // Información de Ruta
   city_source: string;
@@ -15,10 +16,11 @@ export interface Job {
   // Información de Carga
   cargo_name: string;
   cargo_mass_kg: number;
+  cargo_damage: number;
 
   // Estadísticas del Viaje
   planned_distance: number;
-  fuel_consumption: number; // Consumo promedio (L/100km)
+  fuel_comsumption: number; // Consumo promedio (L/100km)
   total_fuel_liters: number; // Litros totales usados
 
   // Finanzas (Calculadas en Backend)
