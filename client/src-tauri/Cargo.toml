@@ -26,3 +26,12 @@ log = "0.4"
 tauri = { version = "2.9.5", features = [] }
 tauri-plugin-log = "2"
 dirs = "6.0.0"
+
+[target.'cfg(windows)'.dependencies]
+winapi = { version = "0.3", features = [
+    "memoryapi", 
+    "winnt", 
+    "handleapi", 
+    "winbase",    # <--- IMPORTANTE: Añade este
+    "minwinbase"  # <--- Por seguridad, añade este también
+] }

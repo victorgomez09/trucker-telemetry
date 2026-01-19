@@ -55,11 +55,12 @@ export class TelemetryService {
 
   private async updateTelemetry() {
     try {
-      const data = await invoke('read_telemetry');
+      const data = await invoke('get_telemetry');
       console.log("data", data)
       this._telemetryData.set(data);
       this._isConnected.set(true);
     } catch (error) {
+      console.error('Error al leer la telemetría:', error);
       if (isDevMode()) {
         this._telemetryData.set(mockData);
         this._isConnected.set(true);

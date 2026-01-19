@@ -16,20 +16,20 @@ export class Telemetry {
 
   hasJob = computed(() => {
     const data = this.telemetry();
-    return data && data.city_source && data.city_source.trim() !== '' && data.job_finished === 0;
+    return data && data.CitySource && data.CitySource.trim() !== '' && data.jobFinished === 0;
   });
 
   isSpeeding = computed(() => {
     const data = this.telemetry();
-    return data && data.speed > data.speed_limit + 5; // Margen de 5km/h
+    return data && data.speed > data.speedLimit + 5; // Margen de 5km/h
   });
 
-  fuelLitres = computed(() => Math.trunc((this.telemetry()?.fuel_amount / 100)))
+  fuelLitres = computed(() => Math.trunc((this.telemetry()?.fuelAmount / 100)))
 
   isLowFuel = computed(() => {
-    const current = this.telemetry()?.fuel_amount || 0;
-    const capacity = this.telemetry()?.fuel_capacity || 0;
-    const warningFactor = this.telemetry()?.fuel_warning_factor || 0.15;
+    const current = this.telemetry()?.fuelAmount || 0;
+    const capacity = this.telemetry()?.fuelCapacity || 0;
+    const warningFactor = this.telemetry()?.fuelWarningFactor || 0.15;
 
     if (capacity === 0) return false;
     return (current / capacity) <= warningFactor;
@@ -37,16 +37,16 @@ export class Telemetry {
 
   remainingKm = computed(() => {
     const data = this.telemetry();
-    if (!data || data.navigation_distance <= 0) return 0;
-    return Math.round(data.navigation_distance / 1000 * 10) / 10;
+    if (!data || data.navigationDistance <= 0) return 0;
+    return Math.round(data.navigationDistance / 1000 * 10) / 10;
   });
 
   progress = computed(() => {
     const data = this.telemetry();
-    if (!data || data.planned_distance <= 0) return 0;
+    if (!data || data.plannedDistance <= 0) return 0;
 
-    const total = data.planned_distance;
-    const remaining = data.navigation_distance / 1000;
+    const total = data.plannedDistance;
+    const remaining = data.navigationDistance / 1000;
 
     let percentage = ((total - remaining) / total) * 100;
 
@@ -73,7 +73,7 @@ export class Telemetry {
     };
   });
 
-  public cheatDetected = computed(() => this.telemetry()?.is_cheater === 1);
+  public cheatDetected = computed(() => this.telemetry()?.isCheater === 1);
   public offlineMode = this.telemetryService.isOfflineMode;
 
   async enviarTrabajo() {

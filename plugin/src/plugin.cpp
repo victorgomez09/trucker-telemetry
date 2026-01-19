@@ -157,17 +157,22 @@ SCSAPI_VOID telemetry_store(const scs_string_t name, const scs_u32_t index, cons
         shared_data->navigation_distance = value->value_float.value;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_odometer) == 0)
         shared_data->odometer = value->value_float.value;
-    if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_fuel) == 0) {
+    if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_fuel) == 0)
+    {
         float current_fuel = value->value_float.value;
         // Si el combustible sube más de 1 litro entre ticks, está repostando
-        if (last_fuel_level > 0 && current_fuel > (last_fuel_level + 1.0f)) {
+        if (last_fuel_level > 0 && current_fuel > (last_fuel_level + 10.0f))
+        {
             float refueled_amount = current_fuel - last_fuel_level;
             shared_data->total_fuel_liters += refueled_amount;
-            if (!is_refueling) {
-                add_gameplay_event(7, (int64_t)estimated_cost, "Repostaje");
+            if (!is_refueling)
+            {
+                add_gameplay_event(7, shared_data->total_fuel_liters * 1.45, "Repostaje");
                 is_refueling = true;
             }
-        } else {
+        }
+        else
+        {
             is_refueling = false;
         }
 
@@ -242,7 +247,8 @@ SCSAPI_VOID gameplay_handler(const scs_event_t event, const void *const event_in
     {
         shared_data->job_finished = 1;
         // add_gameplay_event(2, shared_data->job_income, "Trabajo Entregado");
-        if (shared_data->job_start_odometer > 0) {
+        if (shared_data->job_start_odometer > 0)
+        {
             shared_data->truck_km = shared_data->odometer - shared_data->job_start_odometer;
         }
 
@@ -255,7 +261,8 @@ SCSAPI_VOID gameplay_handler(const scs_event_t event, const void *const event_in
                 float km = attr->value.value_float.value;
                 shared_data->planned_distance = (int32_t)km;
             }
-            if (strcmp(attr->name, SCS_TELEMETRY_GAMEPLAY_EVENT_ATTRIBUTE_earned_xp) == 0) {
+            if (strcmp(attr->name, SCS_TELEMETRY_GAMEPLAY_EVENT_ATTRIBUTE_earned_xp) == 0)
+            {
                 shared_data->job_xp = attr->value.value_u32.value;
             }
         }
@@ -332,7 +339,8 @@ SCSAPI_VOID configuration_handler(const scs_event_t event, const void *const eve
             {
                 shared_data->job_income = attr->value.value_u64.value;
             }
-            else if (strcmp(attr->name, SCS_TELEMETRY_CONFIG_ATTRIBUTE_cargo_mass) == 0) {
+            else if (strcmp(attr->name, SCS_TELEMETRY_CONFIG_ATTRIBUTE_cargo_mass) == 0)
+            {
                 shared_data->cargo_mass = attr->value.value_float.value;
             }
         }
@@ -346,7 +354,7 @@ SCSAPI_VOID configuration_handler(const scs_event_t event, const void *const eve
         }
 
         shared_data->job_start_odometer = shared_data->odometer;
-        shared_data->real_distance_km = 0.0f;
+        shared_data->truck_km = 0.0f;
 
         shared_data->job_finished = 0;
         // add_gameplay_event(4, 0, "Trabajo en curso");
