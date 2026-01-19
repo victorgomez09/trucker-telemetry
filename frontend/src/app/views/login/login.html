@@ -5,12 +5,13 @@
     <div class="max-w-md">
       <div class="card bg-base-100/80 backdrop-blur-xl shadow-2xl border border-white/10">
         <div class="card-body items-center text-center p-10">
-          <div class="avatar placeholder mb-4">
-            <div class="bg-primary text-primary-content rounded-full w-20 shadow-lg">
-              <span class="text-3xl font-black">TR</span>
+          <div class="avatar avatar-placeholder">
+            <div class="bg-primary text-neutral-content w-16 rounded-full">
+              <span class="text-xl font-bold">TR</span>
             </div>
           </div>
-          <h2 class="card-title text-3xl font-black italic uppercase tracking-tighter">TruckRadio <span class="text-primary">Log</span></h2>
+          <h2 class="card-title text-3xl font-black italic uppercase tracking-tighter">Trucker <span
+              class="text-primary">Log</span></h2>
           <p class="text-sm opacity-70 mb-6">Sincroniza tu telemetría y compite con tu flota</p>
 
           <form [formGroup]="loginForm" (ngSubmit)="onLogin()" class="w-full space-y-4">
@@ -18,18 +19,23 @@
               <div class="label">
                 <span class="label-text font-bold">Usuario / Email</span>
               </div>
-              <input type="text" formControlName="username" placeholder="Vandamme_ETS2" class="input input-bordered w-full focus:input-primary" [ngClass]="{'input-error': loginForm.controls['username'].touched && loginForm.controls['username'].errors}" />
+              <input type="text" formControlName="username" placeholder="Vandamme_ETS2"
+                class="input input-bordered w-full focus:input-primary"
+                [ngClass]="{'input-error': loginForm.controls['username'].touched && loginForm.controls['username'].errors}" />
             </label>
 
             <label class="form-control w-full">
               <div class="label">
                 <span class="label-text font-bold">Contraseña</span>
               </div>
-              <input type="password" formControlName="password" placeholder="••••••••" class="input input-bordered w-full focus:input-primary" [ngClass]="{'input-error': loginForm.controls['password'].touched && loginForm.controls['password'].errors}" />
+              <input type="password" formControlName="password" placeholder="••••••••"
+                class="input input-bordered w-full focus:input-primary"
+                [ngClass]="{'input-error': loginForm.controls['password'].touched && loginForm.controls['password'].errors}" />
             </label>
 
             <div class="card-actions w-full mt-6">
-              <button type="submit" class="btn btn-primary btn-block text-lg font-black uppercase" [disabled]="loginForm.invalid">
+              <button type="submit" class="btn btn-primary btn-block text-lg font-black uppercase"
+                [disabled]="loginForm.invalid">
                 Iniciar Ruta
               </button>
             </div>
@@ -37,7 +43,8 @@
 
           <div class="divider text-[10px] opacity-30 uppercase font-bold">O también</div>
 
-          <a routerLink="/register" class="link link-hover text-sm font-semibold opacity-60 hover:text-primary transition-colors">
+          <a routerLink="/register"
+            class="link link-hover text-sm font-semibold opacity-60 hover:text-primary transition-colors">
             Crear una cuenta nueva
           </a>
         </div>

@@ -42,6 +42,9 @@ struct Ets2Data
     uint64_t job_income;
     int32_t planned_distance;
     float navigation_distance;
+    float odometer;
+    float job_start_odometer;
+    float truck_km;
     char city_source[64];
     char city_destination[64];
     char company_source[64];
@@ -152,6 +155,8 @@ SCSAPI_VOID telemetry_store(const scs_string_t name, const scs_u32_t index, cons
         shared_data->speed_limit = value->value_float.value * 3.6f;
     else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_navigation_distance) == 0)
         shared_data->navigation_distance = value->value_float.value;
+    else if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_odometer) == 0)
+        shared_data->odometer = value->value_float.value;
     if (strcmp(name, SCS_TELEMETRY_TRUCK_CHANNEL_fuel) == 0) {
         float current_fuel = value->value_float.value;
         // Si el combustible sube más de 1 litro entre ticks, está repostando
@@ -237,6 +242,10 @@ SCSAPI_VOID gameplay_handler(const scs_event_t event, const void *const event_in
     {
         shared_data->job_finished = 1;
         // add_gameplay_event(2, shared_data->job_income, "Trabajo Entregado");
+        if (shared_data->job_start_odometer > 0) {
+            shared_data->truck_km = shared_data->odometer - shared_data->job_start_odometer;
+        }
+
         memset(shared_data->city_source, 0, 64);
         memset(shared_data->city_destination, 0, 64);
         for (const scs_named_value_t *attr = ev->attributes; attr->name; ++attr)
@@ -336,6 +345,9 @@ SCSAPI_VOID configuration_handler(const scs_event_t event, const void *const eve
             game_log(SCS_LOG_TYPE_message, b);
         }
 
+        shared_data->job_start_odometer = shared_data->odometer;
+        shared_data->real_distance_km = 0.0f;
+
         shared_data->job_finished = 0;
         // add_gameplay_event(4, 0, "Trabajo en curso");
         save_to_disk();
@@ -365,6 +377,7 @@ PLUGIN_EXPORT SCSAPI_RESULT scs_telemetry_init(const scs_u32_t version, const sc
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_wear_chassis, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_navigation_speed_limit, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
     v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_navigation_distance, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
+    v100->register_for_channel(SCS_TELEMETRY_TRUCK_CHANNEL_odometer, SCS_U32_NIL, SCS_VALUE_TYPE_float, 0, telemetry_store, nullptr);
 
     if (game_log)
         game_log(SCS_LOG_TYPE_message, "[Bridge] Plugin Inicializado Correctamente");

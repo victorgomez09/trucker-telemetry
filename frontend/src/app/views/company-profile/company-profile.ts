@@ -12,8 +12,8 @@ import { CompanyService } from '../../services/company';
   styleUrls: ['./company-profile.css'],
 })
 export class CompanyProfileComponent implements OnInit {
-  private companyService = inject(CompanyService);
-  private route = inject(ActivatedRoute);
+  private readonly companyService = inject(CompanyService);
+  private readonly route = inject(ActivatedRoute);
 
   summary = signal<CompanySummary | null>(null);
   isLoading = signal<boolean>(true);

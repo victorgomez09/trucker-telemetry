@@ -12,13 +12,22 @@ export const routes: Routes = [
   },
   {
     path: '',
-    loadComponent: () => import('./views/dashboard/dashboard').then((m) => m.Dashboard),
-    canActivate: [authGuard]
-  },
-  {
-    path: 'companies/:id',
-    loadComponent: () =>
-      import('./views/company-profile/company-profile').then((m) => m.CompanyProfileComponent),
-    canActivate: [authGuard]
-  },
+    loadComponent: () => import('./components/main-layout/main-layout').then(m => m.MainLayout),
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () => import('./views/dashboard/dashboard').then((m) => m.Dashboard),
+      },
+      {
+        path: 'jobs/:id',
+        loadComponent: () => import('./views/job-details/job-details').then((m) => m.JobDetails),
+      },
+      {
+        path: 'companies/:id',
+        loadComponent: () =>
+          import('./views/company-profile/company-profile').then((m) => m.CompanyProfileComponent),
+      },
+    ]
+  }
 ];

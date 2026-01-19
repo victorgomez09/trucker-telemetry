@@ -3,12 +3,13 @@ import { HttpClient } from '@angular/common/http';
 import { CompanySummary } from '../models/company';
 import { Observable, of } from 'rxjs';
 import { AuthService } from './auth';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class CompanyService {
   private http = inject(HttpClient);
   private readonly authService = inject(AuthService)
-  private readonly API_URL = 'https://stunning-garbanzo-x9qj59gwg54c9654-8080.app.github.dev/api/v1/companies';
+  private readonly API_URL = `${environment.API_URL}/companies`;
 
   getCompanySummary(id: number) {
     return this.http.get<CompanySummary>(`${this.API_URL}/${id}/summary`);

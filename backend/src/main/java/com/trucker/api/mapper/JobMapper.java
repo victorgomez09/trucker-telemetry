@@ -15,6 +15,8 @@ public interface JobMapper {
     @Mapping(source = "income", target = "jobIncome")
     @Mapping(source = "distanceKm", target = "plannedDistance")
     @Mapping(source = "cargoDamagePerc", target = "cargoDamage")
+    @Mapping(source = "sourceCompany", target = "companySource")
+    @Mapping(source = "destinationCompany", target = "companyDestination")
     JobResponse toDto(JobEntity jobEntity);
 
     @Mapping(target = "id", ignore = true)

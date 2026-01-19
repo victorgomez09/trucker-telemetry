@@ -54,6 +54,8 @@ public class JobEntity {
 
     @Column(name = "truck_name")
     private String truckName;
+    @Column(name = "truck_km")
+    private Double truckKm;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "job_id")

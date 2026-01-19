@@ -3,6 +3,7 @@ package com.trucker.api.controller;
 import java.security.Principal;
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -17,6 +18,7 @@ import com.trucker.api.dto.DashboardResponse;
 import com.trucker.api.dto.JobRequest;
 import com.trucker.api.dto.JobResponse;
 import com.trucker.api.dto.UserStatsResponse;
+import com.trucker.api.entity.JobEntity;
 import com.trucker.api.mapper.JobMapper;
 import com.trucker.api.service.JobService;
 
@@ -47,6 +49,18 @@ public class JobController {
 
     // return ResponseEntity.ok(jobDto);
     // }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<JobResponse> getJobById(@PathVariable Long id, Principal principal) {
+        JobEntity job = jobService.getJobById(id)
+                .orElseThrow(() -> new RuntimeException("Trabajo no encontrado"));
+                
+        if (!job.getUser().getUsername().equals(principal.getName())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
+        return ResponseEntity.ok(jobMapper.toDto(job));
+    }
 
     @GetMapping("/dashboard")
     public ResponseEntity<DashboardResponse> getDashboardData(Principal principal) {

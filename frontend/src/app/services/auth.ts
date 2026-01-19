@@ -2,16 +2,17 @@ import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap, catchError, of } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private http = inject(HttpClient);
-  private router = inject(Router);
-  private readonly API_URL = 'https://stunning-garbanzo-x9qj59gwg54c9654-8080.app.github.dev/api/v1/auth';
-  private readonly API_USERS_URL = 'https://stunning-garbanzo-x9qj59gwg54c9654-8080.app.github.dev/api/v1/users';
+  private readonly http = inject(HttpClient);
+  private readonly router = inject(Router);
+  private readonly API_URL = `${environment.API_URL}/auth`;
+  private readonly API_USERS_URL = `${environment.API_URL}/users`;
 
-  private tokenSignal = signal<string | null>(localStorage.getItem('truck_token'));
-  private currentUserSignal = signal<any>(null); // Guardamos la info del /me
+  private readonly tokenSignal = signal<string | null>(localStorage.getItem('truck_token'));
+  private readonly currentUserSignal = signal<any>(null); // Guardamos la info del /me
 
   public isAuthenticated = computed(() => !!this.tokenSignal());
   public currentUser = computed(() => this.currentUserSignal());

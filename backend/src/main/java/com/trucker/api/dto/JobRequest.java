@@ -8,6 +8,7 @@ public record JobRequest(
     @JsonProperty("cargo_damage") Double cargoDamage,
     @JsonProperty("cargo_name") String cargoName,
     @JsonProperty("truck_name") String truckName,
+    @JsonProperty("truck_km") String truckKm,
     @JsonProperty("city_source") String citySource,
     @JsonProperty("company_source") String companySource,
     @JsonProperty("city_destination") String cityDestination,
